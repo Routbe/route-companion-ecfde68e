@@ -31,6 +31,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
 import {
   addCustomDomain,
@@ -65,39 +66,16 @@ interface LiveResult {
 
 type DnsProvider = "standard" | "cloudflare" | "transip";
 
-const STATUS: Record<string, { label: string; tone: string; icon: typeof Clock }> = {
-  pending: {
-    label: "🟡 Pending Verification",
-    tone: "bg-muted text-muted-foreground",
-    icon: Clock,
-  },
-  pointing: {
-    label: "Ownership OK · routing missing",
-    tone: "bg-muted text-foreground",
-    icon: Clock,
-  },
-  verified: { label: "✅ Live", tone: "bg-foreground text-background", icon: CheckCircle2 },
+const STATUS_TONE: Record<string, { tone: string; icon: typeof Clock }> = {
+  pending: { tone: "bg-muted text-muted-foreground", icon: Clock },
+  pointing: { tone: "bg-muted text-foreground", icon: Clock },
+  verified: { tone: "bg-foreground text-background", icon: CheckCircle2 },
 };
 
-const LIVE: Record<LiveState, { dot: string; title: string; body: string; icon: typeof Clock }> = {
-  ok: {
-    dot: "bg-emerald-500",
-    title: "Active & connected",
-    body: "Domain is verified and operational.",
-    icon: CheckCircle2,
-  },
-  propagating: {
-    dot: "bg-amber-500",
-    title: "Pending (propagation)",
-    body: "Records found, waiting for worldwide propagation…",
-    icon: Clock,
-  },
-  missing: {
-    dot: "bg-red-500",
-    title: "Not found",
-    body: "No TXT/CNAME record found yet. Check your DNS settings.",
-    icon: XCircle,
-  },
+const LIVE_META: Record<LiveState, { dot: string; icon: typeof Clock }> = {
+  ok: { dot: "bg-emerald-500", icon: CheckCircle2 },
+  propagating: { dot: "bg-amber-500", icon: Clock },
+  missing: { dot: "bg-red-500", icon: XCircle },
 };
 
 /** A subdomain has more than two labels (e.g. atproto.j.delplanche.com); a root
@@ -107,13 +85,13 @@ function isSubdomain(domain: string) {
   return domain.split(".").length > 2;
 }
 
-function copy(value: string, what: string) {
+function copy(value: string, what: string, t: (k: string, p?: Record<string, unknown>) => string) {
   void navigator.clipboard.writeText(value);
-  toast.success(`Copied! · ${what}`);
+  toast.success(t("domains.copied", { what }));
 }
 
 /** One monospace DNS value with its own copy button. */
-function CopyField({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function CopyField({ label, value, hint, onCopy, copyLabel }: { label: string; value: string; hint?: string; onCopy: (v: string, w: string) => void; copyLabel: string }) {
   return (
     <div className="min-w-0">
       <div className="flex items-baseline gap-2">
@@ -131,8 +109,8 @@ function CopyField({ label, value, hint }: { label: string; value: string; hint?
           variant="ghost"
           size="icon"
           className="h-8 w-8 shrink-0"
-          aria-label={`Copy ${label}`}
-          onClick={() => copy(value, label)}
+          aria-label={copyLabel}
+          onClick={() => onCopy(value, label)}
         >
           <Copy className="h-3.5 w-3.5" />
         </Button>
@@ -148,11 +126,19 @@ function RecordCard({
   host,
   value,
   note,
+  onCopy,
+  hostLabel,
+  valueLabel,
+  copyLabel,
 }: {
   type: string;
   host: string;
   value: string;
   note?: string;
+  onCopy: (v: string, w: string) => void;
+  hostLabel: string;
+  valueLabel: string;
+  copyLabel: (label: string) => string;
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-3">
@@ -165,8 +151,8 @@ function RecordCard({
         ) : null}
       </div>
       <div className="mt-2 space-y-2.5">
-        <CopyField label="Host" value={host} />
-        <CopyField label="Value" value={value} />
+        <CopyField label={hostLabel} value={host} onCopy={onCopy} copyLabel={copyLabel(hostLabel)} />
+        <CopyField label={valueLabel} value={value} onCopy={onCopy} copyLabel={copyLabel(valueLabel)} />
       </div>
     </div>
   );
@@ -218,6 +204,7 @@ async function liveCheck(row: DomainRow): Promise<LiveResult> {
 }
 
 export default function Domains() {
+  const { t } = useI18n();
   const { user, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [rows, setRows] = useState<DomainRow[]>([]);
@@ -237,7 +224,7 @@ export default function Domains() {
       const data = (await listCustomDomains()) as unknown as DomainRow[];
       setRows(data ?? []);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not load your domains");
+      toast.error(e instanceof Error ? e.message : t("domains.toast.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -258,10 +245,10 @@ export default function Domains() {
     try {
       await addCustomDomain({ data: { domain: value } });
       setDomain("");
-      toast.success("Domain added — now create the DNS records below.");
+      toast.success(t("domains.toast.added"));
       await load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not add that domain");
+      toast.error(e instanceof Error ? e.message : t("domains.toast.addFailed"));
     } finally {
       setAdding(false);
     }
@@ -273,11 +260,11 @@ export default function Domains() {
       // Live DoH lookup first: instant feedback, then the authoritative server check.
       const result = await liveCheck(row);
       setLive((prev) => ({ ...prev, [row.id]: result }));
-      toast[result.state === "ok" ? "success" : "message"](LIVE[result.state].body);
+      toast[result.state === "ok" ? "success" : "message"](t(`domains.live.${result.state}.body`));
       await verifyCustomDomain({ data: { id: row.id } });
       await load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Verification failed");
+      toast.error(e instanceof Error ? e.message : t("domains.toast.verifyFailed"));
     } finally {
       setChecking(null);
     }
@@ -295,9 +282,9 @@ export default function Domains() {
 
   return (
     <AppLayout
-      crumbs={[{ label: "Custom domains" }]}
-      title="Custom domains"
-      description="Serve your dynamic QR links from your own domain, so a scan shows links.yourbrand.com/x/abc instead of ours."
+      crumbs={[{ label: t("domains.crumb") }]}
+      title={t("domains.title")}
+      description={t("domains.description")}
     >
       <div>
         <Accordion
@@ -312,7 +299,7 @@ export default function Domains() {
           >
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
               <Label htmlFor="domain" className="cursor-pointer">
-                Add a domain
+                {t("domains.add.label")}
               </Label>
             </AccordionTrigger>
             <AccordionContent>
@@ -335,12 +322,11 @@ export default function Domains() {
                   ) : (
                     <Globe className="h-4 w-4" />
                   )}
-                  Add domain
+                  {t("domains.add.button")}
                 </Button>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Use a subdomain you control. Root domains work too, but need an A record instead of
-                a CNAME.
+                {t("domains.add.hint")}
               </p>
             </AccordionContent>
           </AccordionItem>
@@ -358,22 +344,21 @@ export default function Domains() {
             className="rounded-2xl border border-border bg-muted/30 px-3.5 sm:px-5"
           >
             <AccordionTrigger className="text-sm font-medium hover:no-underline">
-              💡 Why a subdomain is the safest choice
+              {t("domains.why.trigger")}
             </AccordionTrigger>
             <AccordionContent>
               <p className="text-xs text-muted-foreground">
-                A subdomain such as{" "}
-                <span className="font-mono text-foreground">links.yourbrand.com</span> or{" "}
-                <span className="font-mono text-foreground">qr.yourbrand.com</span> only needs a
-                single CNAME record. Your website, e-mail and existing records stay untouched. The
-                root domain (<span className="font-mono text-foreground">yourbrand.com</span>) needs
-                an A record and moves your whole site here — only do that if the domain is unused.
+                {t("domains.why.body", {
+                  sub1: "links.yourbrand.com",
+                  sub2: "qr.yourbrand.com",
+                  root: "yourbrand.com",
+                })}
               </p>
               <ul className="mt-3 grid gap-2 sm:grid-cols-3">
                 {[
-                  ["links.yourbrand.com", "Neutral, works for every campaign"],
-                  ["qr.yourbrand.com", "Explicit about what the link is"],
-                  ["go.yourbrand.com", "Short and readable on print"],
+                  ["links.yourbrand.com", t("domains.why.reason1")],
+                  ["qr.yourbrand.com", t("domains.why.reason2")],
+                  ["go.yourbrand.com", t("domains.why.reason3")],
                 ].map(([host, why]) => (
                   <li key={host} className="rounded-xl border border-border bg-background p-3">
                     <p className="break-all font-mono text-xs text-foreground">{host}</p>
@@ -393,14 +378,15 @@ export default function Domains() {
           ) : rows.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center">
               <Globe className="mx-auto h-6 w-6 text-muted-foreground" />
-              <p className="mt-3 text-sm font-medium text-foreground">No domains connected yet</p>
+              <p className="mt-3 text-sm font-medium text-foreground">{t("domains.empty.title")}</p>
               <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-                Add a subdomain above and we'll walk you through the DNS records step by step.
+                {t("domains.empty.body")}
               </p>
             </div>
           ) : (
             rows.map((row) => {
-              const meta = STATUS[row.status] ?? STATUS.pending;
+              const meta = STATUS_TONE[row.status] ?? STATUS_TONE.pending;
+              const statusLabel = t(`domains.status.${row.status in STATUS_TONE ? row.status : "pending"}`);
               const Icon = meta.icon;
               const liveResult = live[row.id];
               const subdomain = isSubdomain(row.domain);
@@ -416,11 +402,11 @@ export default function Domains() {
                       {row.domain}
                     </h2>
                     <Badge className={`gap-1 ${meta.tone}`}>
-                      <Icon className="h-3 w-3" /> {meta.label}
+                      <Icon className="h-3 w-3" /> {statusLabel}
                     </Badge>
                     {row.is_default && (
                       <Badge variant="outline" className="gap-1">
-                        <Star className="h-3 w-3" /> Default
+                        <Star className="h-3 w-3" /> {t("domains.default")}
                       </Badge>
                     )}
                     <div className="ml-auto flex shrink-0 items-center gap-1">
@@ -436,7 +422,7 @@ export default function Domains() {
                         ) : (
                           <RefreshCw className="h-3.5 w-3.5" />
                         )}
-                        Check DNS
+                        {t("domains.checkDns")}
                       </Button>
                       {row.status === "verified" && !row.is_default && (
                         <Button
@@ -444,20 +430,20 @@ export default function Domains() {
                           size="sm"
                           onClick={async () => {
                             await setDefaultDomain({ data: { id: row.id } });
-                            toast.success(`${row.domain} is now the default`);
+                            toast.success(t("domains.toast.makeDefault", { domain: row.domain }));
                             await load();
                           }}
                         >
-                          Make default
+                          {t("domains.makeDefault")}
                         </Button>
                       )}
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label={`Remove ${row.domain}`}
+                        aria-label={t("domains.removeLabel", { domain: row.domain })}
                         onClick={async () => {
                           await deleteCustomDomain({ data: { id: row.id } });
-                          toast.success("Domain removed");
+                          toast.success(t("domains.toast.removed"));
                           await load();
                         }}
                       >
@@ -469,22 +455,22 @@ export default function Domains() {
                   {row.status === "verified" && (
                     <div className="mt-3 flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-3">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground">Short links</p>
+                        <p className="text-sm font-medium text-foreground">{t("domains.shortLinks.title")}</p>
                         <p className="mt-0.5 text-xs text-muted-foreground">
                           {row.short_links_enabled
-                            ? `New links can use ${row.domain}/s/your-code.`
-                            : `Off — new links use the ROUT domain instead.`}
+                            ? t("domains.shortLinks.on", { domain: row.domain })
+                            : t("domains.shortLinks.off")}
                         </p>
                       </div>
                       <Switch
                         checked={row.short_links_enabled}
-                        aria-label={`Short links on ${row.domain}`}
+                        aria-label={t("domains.shortLinks.aria", { domain: row.domain })}
                         onCheckedChange={async (enabled) => {
                           await setDomainShortLinks({ data: { id: row.id, enabled } });
                           toast.success(
                             enabled
-                              ? `Short links on for ${row.domain}`
-                              : `Short links off for ${row.domain}`,
+                              ? t("domains.toast.shortLinksOn", { domain: row.domain })
+                              : t("domains.toast.shortLinksOff", { domain: row.domain }),
                           );
                           await load();
                         }}
@@ -499,14 +485,17 @@ export default function Domains() {
                           className={`h-2.5 w-2.5 shrink-0 rounded-full ${LIVE[liveResult.state].dot}`}
                         />
                         <p className="text-sm font-medium text-foreground">
-                          {LIVE[liveResult.state].title}
+                          {t(`domains.live.${liveResult.state}.title`)}
                         </p>
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {LIVE[liveResult.state].body}
+                        {t(`domains.live.${liveResult.state}.body`)}
                       </p>
                       <p className="mt-2 font-mono text-[11px] text-muted-foreground">
-                        TXT {liveResult.txt ? "✓" : "✗"} · CNAME/A {liveResult.route ? "✓" : "✗"}
+                        {t("domains.liveResult.txtCname", {
+                          txt: liveResult.txt ? "✓" : "✗",
+                          route: liveResult.route ? "✓" : "✗",
+                        })}
                       </p>
                     </div>
                   ) : null}
@@ -518,7 +507,7 @@ export default function Domains() {
                           htmlFor={`provider-${row.id}`}
                           className="text-xs font-medium text-muted-foreground"
                         >
-                          DNS provider
+                          {t("domains.provider.label")}
                         </Label>
                         <Select
                           value={provider}
@@ -528,46 +517,56 @@ export default function Domains() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="cloudflare">Cloudflare & Infomaniak</SelectItem>
-                            <SelectItem value="transip">TransIP</SelectItem>
+                            <SelectItem value="standard">{t("domains.provider.standard")}</SelectItem>
+                            <SelectItem value="cloudflare">{t("domains.provider.cloudflare")}</SelectItem>
+                            <SelectItem value="transip">{t("domains.provider.transip")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <ol className="space-y-5">
-                        <Step n={1} title="Open your DNS Management Console">
-                          <p>
-                            Log in to your domain registrar, e.g. Infomaniak, Cloudflare, for{" "}
-                            <span className="break-all font-mono text-foreground">
-                              {row.domain}
-                            </span>
-                            , and look for “DNS”, “DNS records” or “Zone editor”.
-                          </p>
+                        <Step n={1} title={t("domains.step1.title")}>
+                          <p>{t("domains.step1.body", { domain: row.domain })}</p>
                         </Step>
-                        <Step n={2} title="Add Verification TXT Record">
-                          <p>Proves ownership of this domain. Nothing else changes.</p>
-                          <RecordCard type="TXT" host={txtHost} value={row.verification_token} />
+                        <Step n={2} title={t("domains.step2.title")}>
+                          <p>{t("domains.step2.body")}</p>
+                          <RecordCard
+                            type="TXT"
+                            host={txtHost}
+                            value={row.verification_token}
+                            onCopy={(v, w) => copy(v, w, t)}
+                            hostLabel={t("domains.host")}
+                            valueLabel={t("domains.value")}
+                            copyLabel={(label) => t("domains.copyLabel", { label })}
+                          />
                         </Step>
-                        <Step n={3} title="Add Routing Record">
-                          <p>Routes your QR traffic to ROUT.</p>
+                        <Step n={3} title={t("domains.step3.title")}>
+                          <p>{t("domains.step3.body")}</p>
                           {subdomain ? (
                             <RecordCard
                               type="CNAME"
                               host={cnameHost}
                               value={DOMAIN_CNAME_TARGET}
-                              note="TTL Auto or 3600 · proxy/CDN off"
+                              note={t("domains.step3.note")}
+                              onCopy={(v, w) => copy(v, w, t)}
+                              hostLabel={t("domains.host")}
+                              valueLabel={t("domains.value")}
+                              copyLabel={(label) => t("domains.copyLabel", { label })}
                             />
                           ) : (
-                            <RecordCard type="A" host={cnameHost || "@"} value={DOMAIN_A_TARGET} />
+                            <RecordCard
+                              type="A"
+                              host={cnameHost || "@"}
+                              value={DOMAIN_A_TARGET}
+                              onCopy={(v, w) => copy(v, w, t)}
+                              hostLabel={t("domains.host")}
+                              valueLabel={t("domains.value")}
+                              copyLabel={(label) => t("domains.copyLabel", { label })}
+                            />
                           )}
                         </Step>
-                        <Step n={4} title="Verify & Propagation">
-                          <p>
-                            Press “Check DNS” to validate. Records usually go live within minutes,
-                            but propagation can take up to 24 hours — you can safely close this
-                            page.
-                          </p>
+                        <Step n={4} title={t("domains.step4.title")}>
+                          <p>{t("domains.step4.body")}</p>
                         </Step>
                       </ol>
                     </div>
@@ -575,7 +574,7 @@ export default function Domains() {
 
                   {row.last_checked_at && (
                     <p className="mt-3 text-[11px] text-muted-foreground">
-                      Last checked {new Date(row.last_checked_at).toLocaleString()}
+                      {t("domains.lastChecked", { when: new Date(row.last_checked_at).toLocaleString() })}
                     </p>
                   )}
                 </article>

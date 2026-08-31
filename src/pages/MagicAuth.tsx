@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requestMagicLink } from "@/lib/auth.functions";
+import { useI18n } from "@/lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +18,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * volledige tour wil doet `/start`; wie terugkomt is hier in twee tikken klaar.
  */
 export function MagicAuth({ mode }: { mode: "login" | "register" }) {
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -31,7 +33,7 @@ export function MagicAuth({ mode }: { mode: "login" | "register" }) {
     const result = await requestMagicLink({ data: { email: email.trim() } }).catch(() => null);
     setBusy(false);
     if (!result?.ok) {
-      toast.error("We konden de inloglink niet versturen. Probeer het straks opnieuw.");
+      toast.error(t("magicauth.sendFailed"));
       return;
     }
     setSent(true);
@@ -39,11 +41,11 @@ export function MagicAuth({ mode }: { mode: "login" | "register" }) {
 
   return (
     <AppLayout
-      title={isRegister ? "Registreren" : "Inloggen"}
+      title={isRegister ? t("magicauth.title.register") : t("magicauth.title.login")}
       description={
         isRegister
-          ? "Maak je ROUT-account met één e-mail — geen wachtwoord nodig."
-          : "Log in met een magic link in je mailbox — geen wachtwoord nodig."
+          ? t("magicauth.description.register")
+          : t("magicauth.description.login")
       }
       width="default"
     >
@@ -51,10 +53,9 @@ export function MagicAuth({ mode }: { mode: "login" | "register" }) {
         {sent ? (
           <div className="rounded-3xl border border-border bg-card p-8 text-center">
             <MailCheck className="mx-auto h-8 w-8 text-foreground" aria-hidden />
-            <h1 className="mt-4 text-lg font-semibold text-foreground">Check je mailbox</h1>
+            <h1 className="mt-4 text-lg font-semibold text-foreground">{t("magicauth.sent.title")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              We stuurden een inloglink naar <span className="font-medium">{email.trim()}</span>. De
-              link is 15 minuten geldig.
+              {t("magicauth.sent.body1")} <span className="font-medium">{email.trim()}</span>. {t("magicauth.sent.body2")}
             </p>
             <Button
               variant="outline"
@@ -64,29 +65,29 @@ export function MagicAuth({ mode }: { mode: "login" | "register" }) {
                 setEmail("");
               }}
             >
-              Ander e-mailadres gebruiken
+{t("magicauth.sent.useOther")}
             </Button>
           </div>
         ) : (
           <form onSubmit={submit} className="rounded-3xl border border-border bg-card p-8">
             <h1 className="text-xl font-semibold text-foreground">
-              {isRegister ? "Maak je ROUT-account" : "Welkom terug"}
+              {isRegister ? t("magicauth.form.titleRegister") : t("magicauth.form.titleLogin")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               {isRegister
-                ? "Vul je e-mailadres in. Je krijgt direct een link om je account te activeren."
-                : "Vul je e-mailadres in. Je krijgt direct een inloglink."}
+                ? t("magicauth.form.bodyRegister")
+                : t("magicauth.form.bodyLogin")}
             </p>
 
             <div className="mt-6 space-y-2">
-              <Label htmlFor="magic-email">E-mailadres</Label>
+              <Label htmlFor="magic-email">{t("magicauth.form.emailLabel")}</Label>
               <Input
                 id="magic-email"
                 type="email"
                 inputMode="email"
                 autoComplete="email"
                 autoFocus
-                placeholder="jij@voorbeeld.be"
+                placeholder={t("magicauth.form.emailPlaceholder")}
                 value={email}
                 maxLength={320}
                 onChange={(event) => setEmail(event.target.value)}
@@ -100,29 +101,29 @@ export function MagicAuth({ mode }: { mode: "login" | "register" }) {
               ) : (
                 <ArrowRight className="h-4 w-4" aria-hidden />
               )}
-              {isRegister ? "Account activeren" : "Stuur inloglink"}
+              {isRegister ? t("magicauth.form.submitRegister") : t("magicauth.form.submitLogin")}
             </Button>
 
             <div className="mt-6 space-y-2 border-t border-border pt-5 text-sm">
               {isRegister ? (
                 <p className="text-muted-foreground">
-                  Al een account?{" "}
+                  {t("magicauth.form.hasAccount")}{" "}
                   <Link to="/login" className="font-medium text-foreground underline">
-                    Inloggen
+                    {t("magicauth.form.loginLink")}
                   </Link>
                 </p>
               ) : (
                 <p className="text-muted-foreground">
-                  Nog geen account?{" "}
+                  {t("magicauth.form.noAccount")}{" "}
                   <Link to="/register" className="font-medium text-foreground underline">
-                    Registreren
+                    {t("magicauth.form.registerLink")}
                   </Link>
                 </p>
               )}
               <p className="flex items-center gap-1.5 text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden />
                 <Link to="/start" className="font-medium text-foreground underline">
-                  Bouw eerst je profiel in de tour
+                  {t("magicauth.form.tourLink")}
                 </Link>
               </p>
             </div>

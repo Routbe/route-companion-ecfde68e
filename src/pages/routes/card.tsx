@@ -17,6 +17,7 @@ import {
 import { decodeCardPayload } from "@/lib/card-link";
 import { downloadVCard } from "@/lib/rich-qr";
 import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n";
 
 type CardSearch = { d?: string };
 
@@ -25,6 +26,7 @@ type CardSearch = { d?: string };
 const linkify = (v: string) => (/^[a-z]+:\/\//i.test(v) ? v : `https://${v}`);
 
 function CardPage() {
+  const { t } = useI18n();
   const { d } = useSearch({ from: "/card" });
   const values = useMemo(() => (d ? decodeCardPayload(d) : null), [d]);
 
@@ -32,49 +34,47 @@ function CardPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 px-6 text-center">
         <RoutLogo size={26} />
-        <h1 className="font-display text-2xl text-foreground">This card link is invalid</h1>
-        <p className="text-sm text-muted-foreground">
-          Ask the sender for a fresh link, or scan their QR code again.
-        </p>
+        <h1 className="font-display text-2xl text-foreground">{t("card.invalid.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("card.invalid.body")}</p>
       </div>
     );
   }
 
   const fullName =
-    [values.firstName, values.lastName].filter(Boolean).join(" ").trim() || "Contact";
+    [values.firstName, values.lastName].filter(Boolean).join(" ").trim() || t("card.defaultName");
   const rows: { icon: typeof Mail; label: string; value: string; href?: string }[] = [];
   if (values.phoneMobile)
     rows.push({
       icon: Smartphone,
-      label: "Mobile",
+      label: t("card.field.mobile"),
       value: values.phoneMobile,
       href: `tel:${values.phoneMobile.replace(/\s+/g, "")}`,
     });
   if (values.phoneWork)
     rows.push({
       icon: Phone,
-      label: "Work",
+      label: t("card.field.work"),
       value: values.phoneWork,
       href: `tel:${values.phoneWork.replace(/\s+/g, "")}`,
     });
   if (values.email)
-    rows.push({ icon: Mail, label: "E-mail", value: values.email, href: `mailto:${values.email}` });
+    rows.push({ icon: Mail, label: t("card.field.email"), value: values.email, href: `mailto:${values.email}` });
   if (values.website)
     rows.push({
       icon: Globe,
-      label: "Website",
+      label: t("card.field.website"),
       value: values.website,
       href: linkify(values.website),
     });
   if (values.linkedin)
     rows.push({
       icon: Linkedin,
-      label: "LinkedIn",
+      label: t("card.field.linkedin"),
       value: values.linkedin,
       href: linkify(values.linkedin),
     });
-  if (values.company) rows.push({ icon: Building2, label: "Company", value: values.company });
-  if (values.address) rows.push({ icon: MapPin, label: "Address", value: values.address });
+  if (values.company) rows.push({ icon: Building2, label: t("card.field.company"), value: values.company });
+  if (values.address) rows.push({ icon: MapPin, label: t("card.field.address"), value: values.address });
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center px-4 py-10">
@@ -110,14 +110,14 @@ function CardPage() {
         <Button
           className="mt-6 h-12 w-full gap-2 rounded-full text-base"
           onClick={() => {
-            if (downloadVCard(values)) toast.success("Contact card downloaded");
-            else toast.error("This card has no name to save.");
+            if (downloadVCard(values)) toast.success(t("card.toast.downloaded"));
+            else toast.error(t("card.toast.noName"));
           }}
         >
-          <Download className="h-4 w-4" /> Add to contacts
+          <Download className="h-4 w-4" /> {t("card.addToContacts")}
         </Button>
         <p className="mt-2 text-center text-[11px] text-muted-foreground">
-          Downloads a standard .vcf file — open it to save {fullName} to your phone.
+          {t("card.downloadHint", { name: fullName })}
         </p>
 
         {rows.length > 0 && (

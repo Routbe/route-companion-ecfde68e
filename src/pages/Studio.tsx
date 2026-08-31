@@ -7,9 +7,11 @@ import { ProfileEditor, type ProfileVariant } from "@/components/dashboard/Profi
 import { BadgeCheck, Sparkles } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/lib/i18n";
 
 /** /studio — the dedicated Profile Hub (link-in-bio) workspace. */
 export default function Studio() {
+  const { t } = useI18n();
   const { user, loading } = useAuth();
   const nav = useNavigate();
   // Twee losstaande profielen per account: het geverifieerde rootprofiel en het
@@ -23,20 +25,20 @@ export default function Studio() {
   return (
     <AppLayout
       width="wide"
-      title="Profile Hub Studio"
-      description="Your sovereign link-in-bio: components, design, subdomain and verification."
-      crumbs={[{ label: "Studio" }]}
+      title={t("studio.title")}
+      description={t("studio.description")}
+      crumbs={[{ label: t("studio.crumb") }]}
     >
       {loading || !user ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <div className="relative h-24 w-24"><BrandLoader label="Studio laden…" /></div>
+          <div className="relative h-24 w-24"><BrandLoader label={t("studio.loading")} /></div>
         </div>
       ) : (
         <div className="flex flex-1 flex-col space-y-6 pb-8">
           <div className="flex flex-wrap gap-2 rounded-xl border border-border/60 bg-muted/30 p-1">
             {([
-              { id: "verified" as ProfileVariant, label: "Geverifieerd profiel", hint: "rout.be/handle", Icon: BadgeCheck },
-              { id: "alias" as ProfileVariant, label: "Gratis aliasprofiel", hint: "rout.be/u/handle", Icon: Sparkles },
+              { id: "verified" as ProfileVariant, label: t("studio.variant.verified"), hint: "rout.be/handle", Icon: BadgeCheck },
+              { id: "alias" as ProfileVariant, label: t("studio.variant.alias"), hint: "rout.be/u/handle", Icon: Sparkles },
             ]).map(({ id, label, hint, Icon }) => (
               <button
                 key={id}

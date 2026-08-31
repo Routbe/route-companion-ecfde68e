@@ -75,7 +75,7 @@ export default function Stats() {
   const [expiryInput, setExpiryInput] = useState("");
   const [targetInput, setTargetInput] = useState("");
 
-  useTitle("QR scan analytics");
+  useTitle(t("stats.pageTitle"));
 
   const load = async () => {
     if (!token) return;
@@ -89,7 +89,7 @@ export default function Stats() {
       });
       if (rpcError) throw new Error(rpcError.message);
       if (!raw) {
-        setError("Dashboard not found.");
+        setError(t("stats.notFound"));
         setLoading(false);
         return;
       }
@@ -111,7 +111,7 @@ export default function Stats() {
       setExpiryInput(json.tracked.expires_at ? json.tracked.expires_at.slice(0, 16) : "");
       setTargetInput(json.tracked.target_url);
     } catch (e: unknown) {
-      setError(errorMessage(e, "Failed to load"));
+      setError(errorMessage(e, t("stats.loadFailed")));
     } finally {
       setLoading(false);
     }
@@ -160,9 +160,9 @@ export default function Stats() {
   const copy = async (v: string) => {
     try {
       await navigator.clipboard.writeText(v);
-      toast.success("Copied");
+      toast.success(t("stats.copied"));
     } catch {
-      toast.error("Copy failed");
+      toast.error(t("stats.copyFailed"));
     }
   };
 
@@ -199,26 +199,26 @@ export default function Stats() {
       toast.success(successMsg);
       await load();
     } catch (e: unknown) {
-      toast.error(errorMessage(e, "Action failed"));
+      toast.error(errorMessage(e, t("stats.actionFailed")));
     } finally {
       setManaging(false);
     }
   };
 
   const regenerate = async () => {
-    if (!confirm("Regenerate the short link? Existing printed QR codes will stop working.")) return;
+    if (!confirm(t("stats.regenerateConfirm"))) return;
     const slug = await allocateSlug();
     if (!slug) {
-      toast.error("Could not generate a new short code");
+      toast.error(t("stats.regenerateFailed"));
       return;
     }
-    manage({ action: "regenerate_slug", slug }, "New short link generated");
+    manage({ action: "regenerate_slug", slug }, t("stats.regenerated"));
   };
   const toggleActive = () => {
     if (!data) return;
     manage(
       { action: "set_active", is_active: !data.tracked.is_active },
-      data.tracked.is_active ? "Link disabled" : "Link enabled",
+      data.tracked.is_active ? t("stats.linkDisabled") : t("stats.linkEnabled"),
     );
   };
   const saveTarget = () => {
@@ -244,7 +244,7 @@ export default function Stats() {
         action: "set_expiry",
         expires_at: expiryInput ? new Date(expiryInput).toISOString() : null,
       },
-      expiryInput ? "Expiry updated" : "Expiry cleared",
+      expiryInput ? t("stats.expiryUpdated") : t("stats.expiryCleared"),
     );
   };
 
@@ -366,7 +366,7 @@ export default function Stats() {
                     <button
                       onClick={() => copy(data.tracked.redirect_url)}
                       className="text-muted-foreground hover:text-foreground shrink-0"
-                      aria-label="Copy"
+                      aria-label={t("stats.copyAria")}
                     >
                       <Copy className="w-3.5 h-3.5" />
                     </button>
@@ -423,7 +423,7 @@ export default function Stats() {
                     <Button
                       onClick={() => {
                         setExpiryInput("");
-                        manage({ action: "set_expiry", expires_at: null }, "Expiry cleared");
+                        manage({ action: "set_expiry", expires_at: null }, t("stats.expiryCleared"));
                       }}
                       disabled={managing}
                       variant="ghost"

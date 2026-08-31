@@ -7,16 +7,13 @@ import { LegalActionBar } from "@/components/LegalActionBar";
 import { LegalPage } from "@/components/LegalPage";
 import { LegalChips, type LegalChip } from "@/components/LegalChips";
 import { ShieldCheck } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 
 
 const badgeClass =
   "inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/60 px-2.5 py-1 font-mono text-[11px] text-muted-foreground";
 
-/**
- * Compliance badge. Uses a single neutral/positive status dot instead of an
- * emoji or a red indicator: red reads as "problem" next to a privacy claim.
- */
 function Badge({
   children,
   tone = "positive",
@@ -38,18 +35,6 @@ function Badge({
   );
 }
 
-const chips: LegalChip[] = [
-  { id: "controller", label: "Controller" },
-  { id: "static", label: "Static QR" },
-  { id: "dynamic", label: "Analytics" },
-  { id: "accounts", label: "Accounts & SSO" },
-  { id: "domains", label: "Custom Domains" },
-  { id: "api", label: "API Logs" },
-  { id: "payments", label: "Payments" },
-  { id: "hosting", label: "EU Hosting" },
-  { id: "rights", label: "Your Rights" },
-];
-
 function numbered(n: string, text: string) {
   return (
     <h2 className="font-serif text-lg font-semibold text-foreground">
@@ -64,73 +49,70 @@ const bodyText = "text-sm leading-relaxed text-foreground/80";
 const listClass = "space-y-2 pl-4 text-sm leading-relaxed text-foreground/80 [&>li]:list-disc";
 const strong = "font-medium text-foreground";
 
-const rights = [
-  {
-    title: "Access & portability",
-    detail: "Instant mechanisms to export a machine-readable copy of your personal data.",
-  },
-  {
-    title: "Rectification & erasure",
-    detail: "Immediate self-service deletion of accounts, custom links, and associated metadata.",
-  },
-  {
-    title: "Restriction & objection",
-    detail: "Rights to restrict or object to legitimate-interest processing at any time.",
-  },
-  {
-    title: "Supervisory recourse",
-    detail:
-      "Explicit right to lodge a formal complaint with the Brussels GBA/APD, Drukpersstraat 35, 1000 Brussels.",
-  },
-];
-
 function PrivacyPage() {
+  const { t } = useI18n();
+
+  const chips: LegalChip[] = [
+    { id: "controller", label: t("privacy.chip.controller") },
+    { id: "static", label: t("privacy.chip.static") },
+    { id: "dynamic", label: t("privacy.chip.dynamic") },
+    { id: "accounts", label: t("privacy.chip.accounts") },
+    { id: "domains", label: t("privacy.chip.domains") },
+    { id: "api", label: t("privacy.chip.api") },
+    { id: "payments", label: t("privacy.chip.payments") },
+    { id: "hosting", label: t("privacy.chip.hosting") },
+    { id: "rights", label: t("privacy.chip.rights") },
+  ];
+
+  const rights = [
+    { title: t("privacy.rights.access.title"), detail: t("privacy.rights.access.detail") },
+    { title: t("privacy.rights.rectification.title"), detail: t("privacy.rights.rectification.detail") },
+    { title: t("privacy.rights.restriction.title"), detail: t("privacy.rights.restriction.detail") },
+    { title: t("privacy.rights.supervisory.title"), detail: t("privacy.rights.supervisory.detail") },
+  ];
+
   return (
     <LegalPage
-      title="Privacy Policy"
-      updated="Last updated: August 2026 · GDPR / AVG compliant"
+      title={t("privacy.title")}
+      updated={t("privacy.updated")}
       card
       subtitle={
         <div className="my-3 flex flex-wrap items-center gap-2">
-          <Badge>EU hosted (Postgres EU)</Badge>
-          <Badge>No advertising trackers</Badge>
-          <Badge>GDPR / AVG compliant</Badge>
-          <Badge tone="neutral">GBA / APD Brussels</Badge>
+          <Badge>{t("privacy.badge.euHosted")}</Badge>
+          <Badge>{t("privacy.badge.noTrackers")}</Badge>
+          <Badge>{t("privacy.badge.gdpr")}</Badge>
+          <Badge tone="neutral">{t("privacy.badge.gba")}</Badge>
         </div>
       }
       quickJump={<LegalChips chips={chips} />}
       sections={[
         {
           id: "controller",
-          heading: numbered("01", "Legal basis & controller identification"),
+          heading: numbered("01", t("privacy.section.controller.heading")),
           wrapperClassName: sectionWrapper,
           body: (
             <>
               <p className={bodyText}>
-                ROUT is operated as an independent developer infrastructure project by an individual
-                creator, established in Brussels, Belgium (EU). The creator acts as the{" "}
-                <span className={strong}>data controller</span> for all processing described here.
-                The architecture is zero-trust by design: local execution first, data minimisation
-                throughout, and absolute transparency about what leaves your device.
+                {t("privacy.section.controller.body1a")}{" "}
+                <span className={strong}>{t("privacy.section.controller.controllerLabel")}</span>{" "}
+                {t("privacy.section.controller.body1b")}
               </p>
               <p className={bodyText}>
-                Contact channel for all privacy matters:{" "}
+                {t("privacy.section.controller.contact1")}{" "}
                 <a
                   href="mailto:contact@rout.be"
                   className="font-mono text-xs text-primary underline-offset-4 hover:underline"
                 >
                   contact@rout.be
                 </a>
-                . Statutory response timeline: we answer data subject requests{" "}
-                <span className={strong}>within one calendar month</span>, in line with Article 12
-                GDPR.
+                . {t("privacy.section.controller.contact2")}{" "}
+                <span className={strong}>{t("privacy.section.controller.contact2Label")}</span>
+                {t("privacy.section.controller.contact3")}
               </p>
               <p className={bodyText}>
-                Primary supervisory authority:{" "}
-                <span className={strong}>
-                  Gegevensbeschermingsautoriteit (GBA) / Autorité de protection des données (APD)
-                </span>
-                , Drukpersstraat 35, 1000 Brussels, Belgium.
+                {t("privacy.section.controller.authority1")}{" "}
+                <span className={strong}>{t("privacy.section.controller.authorityLabel")}</span>
+                {t("privacy.section.controller.authority2")}
               </p>
             </>
           ),
@@ -142,161 +124,119 @@ function PrivacyPage() {
               <ShieldCheck className="mt-1 size-4 shrink-0" aria-hidden="true" />
               <span>
                 <span className="mr-2 font-mono text-xs text-muted-foreground">02.</span>
-                Static QR codes — absolute zero-data architecture
+                {t("privacy.section.static.heading")}
               </span>
             </h2>
           ),
           wrapperClassName:
             "my-6 scroll-mt-24 rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-4 sm:p-6 dark:bg-emerald-500/10",
-          body: (
-            <p className={bodyText}>
-              Static QR codes are compiled and generated entirely client-side, inside your browser's
-              local sandbox. Payload contents — URLs, vCards, Wi-Fi keys, IBAN strings — never touch
-              ROUT servers, are never intercepted, and generate zero server-side logs or residual
-              telemetry. Nothing is uploaded, so there is nothing for us to store, disclose, or
-              lose.
-            </p>
-          ),
+          body: <p className={bodyText}>{t("privacy.section.static.body")}</p>,
         },
         {
           id: "dynamic",
-          heading: numbered("03", "Dynamic routing, short links & anonymous analytics"),
+          heading: numbered("03", t("privacy.section.dynamic.heading")),
           wrapperClassName: sectionWrapper,
           body: (
             <ul className={listClass}>
               <li>
-                <span className={strong}>Contractual necessity (Art. 6(1)(b) GDPR):</span> we
-                process destination URLs solely to execute the redirects you requested.
+                <span className={strong}>{t("privacy.section.dynamic.contractualLabel")}</span>{" "}
+                {t("privacy.section.dynamic.contractualBody")}
               </li>
               <li>
-                <span className={strong}>Legitimate interest (Art. 6(1)(f) GDPR):</span> collection
-                of coarse, strictly anonymised scan metadata — timestamp, country-level geolocation,
-                and device category family.
+                <span className={strong}>{t("privacy.section.dynamic.legitimateLabel")}</span>{" "}
+                {t("privacy.section.dynamic.legitimateBody")}
               </li>
               <li>
-                <span className={strong}>Strict privacy guarantees:</span> full visitor IP addresses
-                are never logged or stored. Visitor browser fingerprinting is explicitly disabled.
-                Advertising profiling and cross-site tracking are fundamentally omitted.
+                <span className={strong}>{t("privacy.section.dynamic.guaranteesLabel")}</span>{" "}
+                {t("privacy.section.dynamic.guaranteesBody")}
               </li>
               <li>
-                <span className={strong}>Transport-layer transparency:</span> while browser-based QR
-                generation is 100% local and zero-knowledge, dynamic link and profile hub resolution
-                (<span className="font-mono text-xs">rout.id</span> /{" "}
-                <span className="font-mono text-xs">rout.be</span>) necessarily passes through
-                network nodes. Standard transport metadata (IP address, User-Agent) is processed
-                in-memory strictly for real-time routing and immediate DDoS mitigation, with{" "}
-                <span className={strong}>zero long-term retention</span> and no advertising
-                fingerprinting.
+                <span className={strong}>{t("privacy.section.dynamic.transportLabel")}</span>{" "}
+                {t("privacy.section.dynamic.transportBody1")} (
+                <span className="font-mono text-xs">rout.id</span> /{" "}
+                <span className="font-mono text-xs">rout.be</span>) {t("privacy.section.dynamic.transportBody2")}{" "}
+                <span className={strong}>{t("privacy.section.dynamic.transportRetentionLabel")}</span>{" "}
+                {t("privacy.section.dynamic.transportBody3")}
               </li>
               <li>
-                <span className={strong}>Data lifecycle:</span> scan analytics are tied directly to
-                the lifecycle of the dynamic link — purging or deleting a link instantly erases its
-                aggregated statistics.
+                <span className={strong}>{t("privacy.section.dynamic.lifecycleLabel")}</span>{" "}
+                {t("privacy.section.dynamic.lifecycleBody")}
               </li>
             </ul>
           ),
         },
         {
           id: "accounts",
-          heading: numbered("04", "Authentication, user accounts & OAuth federation"),
+          heading: numbered("04", t("privacy.section.accounts.heading")),
           wrapperClassName: sectionWrapper,
           body: (
             <ul className={listClass}>
               <li>
-                <span className={strong}>Account data:</span> email addresses, secure password
-                hashes (where applicable), and user profile configurations.
+                <span className={strong}>{t("privacy.section.accounts.dataLabel")}</span>{" "}
+                {t("privacy.section.accounts.dataBody")}
               </li>
               <li>
-                <span className={strong}>External SSO handlers:</span> when authenticating via
-                external identity providers (such as GitHub, Google, Apple, GitLab, or a custom OIDC
-                provider), ROUT securely ingests only the necessary baseline identifiers — email and
-                display name — for active session maintenance.
+                <span className={strong}>{t("privacy.section.accounts.ssoLabel")}</span>{" "}
+                {t("privacy.section.accounts.ssoBody")}
               </li>
               <li>
-                <span className={strong}>Identity / payment decoupling:</span> sovereign profile
-                management (WebAuthn passkeys, custom OIDC via Keycloak or Authentik) is kept
-                strictly separate from regulated fiat payment gateways (SEPA, PayPal, Venmo).
-                Financial verification data is processed independently by PCI-DSS compliant
-                providers and is never joined to your decentralised identity records.
+                <span className={strong}>{t("privacy.section.accounts.decouplingLabel")}</span>{" "}
+                {t("privacy.section.accounts.decouplingBody")}
               </li>
               <li>
-                <span className={strong}>Session integrity:</span> essential authentication state is
-                maintained via isolated secure cookies and local storage tokens. Zero commercial
-                tracking pixels or third-party analytics scripts exist on authenticated endpoints.
+                <span className={strong}>{t("privacy.section.accounts.sessionLabel")}</span>{" "}
+                {t("privacy.section.accounts.sessionBody")}
               </li>
             </ul>
           ),
         },
         {
           id: "domains",
-          heading: numbered("05", "Custom domains & infrastructure routing"),
+          heading: numbered("05", t("privacy.section.domains.heading")),
           wrapperClassName: sectionWrapper,
-          body: (
-            <p className={bodyText}>
-              When end-users route traffic through custom domains linked to ROUT, core proxy and
-              routing metadata are handled strictly for high-precision redirection and SSL
-              termination. Visitor IP tracking on custom domain zones is disabled to preserve user
-              sovereignty.
-            </p>
-          ),
+          body: <p className={bodyText}>{t("privacy.section.domains.body")}</p>,
         },
         {
           id: "api",
-          heading: numbered("06", "Programmatic access, API keys & rate limiting"),
+          heading: numbered("06", t("privacy.section.api.heading")),
           wrapperClassName: sectionWrapper,
-          body: (
-            <p className={bodyText}>
-              API interactions generate minimal technical access logs — timestamp, endpoint URI,
-              response status, and rate-limiting counters — retained exclusively for infrastructure
-              security, defence against DDoS attacks, and API stability enforcement.
-            </p>
-          ),
+          body: <p className={bodyText}>{t("privacy.section.api.body")}</p>,
         },
         {
           id: "payments",
-          heading: numbered("07", "Micro-payments, verification fees & financial data"),
+          heading: numbered("07", t("privacy.section.payments.heading")),
           wrapperClassName: sectionWrapper,
           body: (
             <>
+              <p className={bodyText}>{t("privacy.section.payments.body1")}</p>
               <p className={bodyText}>
-                Financial transactions for account verification or premium routing tiers are
-                processed securely through certified, PCI-DSS compliant third-party payment
-                gateways. ROUT does not store raw credit card credentials, IBAN mandates or other
-                sensitive financial instruments on its own infrastructure.
-              </p>
-              <p className={bodyText}>
-                <span className={strong}>Strict separation:</span> the billing record required by
-                accounting law lives in a distinct processing context from your handle, passkeys and
-                published profile data. Regulated payment identity is never merged into, exported
-                with, or used to enrich sovereign identity records.
+                <span className={strong}>{t("privacy.section.payments.separationLabel")}</span>{" "}
+                {t("privacy.section.payments.separationBody")}
               </p>
             </>
           ),
         },
         {
           id: "hosting",
-          heading: numbered("08", "Sovereign infrastructure & hosting (EU)"),
+          heading: numbered("08", t("privacy.section.hosting.heading")),
           wrapperClassName: sectionWrapper,
           body: (
             <>
               <p className={bodyText}>
-                All user state and relational configurations are stored within{" "}
-                <span className={strong}>European Economic Area (EEA)</span> data centres on managed
-                PostgreSQL infrastructure, under a strict Data Processing Agreement (DPA) featuring
-                encryption in transit and at rest.
+                {t("privacy.section.hosting.body1a")}{" "}
+                <span className={strong}>{t("privacy.section.hosting.eeaLabel")}</span>{" "}
+                {t("privacy.section.hosting.body1b")}
               </p>
               <p className={bodyText}>
-                <span className={strong}>Residency commitment:</span> primary databases, automated
-                backups and routing proxies all operate inside the EEA. No production personal data
-                is replicated to jurisdictions subject to extraterritorial surveillance frameworks
-                such as the US CLOUD Act.
+                <span className={strong}>{t("privacy.section.hosting.residencyLabel")}</span>{" "}
+                {t("privacy.section.hosting.residencyBody")}
               </p>
             </>
           ),
         },
         {
           id: "rights",
-          heading: numbered("09", "Enforceable data subject rights (GDPR Chapter III)"),
+          heading: numbered("09", t("privacy.section.rights.heading")),
           wrapperClassName: "scroll-mt-24",
           body: (
             <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -316,9 +256,9 @@ function PrivacyPage() {
       footer={
         <LegalActionBar
           links={[
-            { to: "/contact", label: "Contact data request" },
-            { to: "/terms", label: "Terms of Use" },
-            { to: "/sovereignty", label: "Sovereignty" },
+            { to: "/contact", label: t("privacy.footer.contact") },
+            { to: "/terms", label: t("privacy.footer.terms") },
+            { to: "/sovereignty", label: t("privacy.footer.sovereignty") },
           ]}
         />
       }

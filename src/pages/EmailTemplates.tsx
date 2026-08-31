@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { BUNNY_URL, SITE_ORIGIN } from "@/lib/site";
+import { useI18n } from "@/lib/i18n";
 
 /**
  * Twee kant-en-klare, ultraschone HTML-mailtemplates in ROUT-huisstijl:
@@ -206,6 +207,7 @@ function buildHtml(d: MailData): string {
 }
 
 export default function EmailTemplatesPage() {
+  const { t } = useI18n();
   const [data, setData] = useState<MailData>({
     variant: "personal",
     subject: "Je ROUT-link staat klaar",
@@ -226,30 +228,30 @@ export default function EmailTemplatesPage() {
     try {
       await navigator.clipboard.writeText(html);
       setCopied(true);
-      toast.success("Raw HTML gekopieerd — plak in Infomaniak Mail (HTML-modus)");
+      toast.success(t("emailtemplates.toast.copied"));
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      toast.error("Kopiëren mislukt — selecteer de code handmatig");
+      toast.error(t("emailtemplates.toast.copyFailed"));
     }
   };
 
   const fields: Array<{ k: keyof MailData; label: string; placeholder?: string }> = [
-    { k: "subject", label: "Titel in de mail" },
-    { k: "greeting", label: "Aanspreking", placeholder: "Beste" },
-    { k: "sender", label: "Afzender" },
-    { k: "role", label: "Functie" },
-    { k: "email", label: "E-mail" },
-    { k: "phone", label: "Telefoon (optioneel)" },
-    { k: "handle", label: "Link-in-bio badge", placeholder: "rout.be/jona" },
-    { k: "ctaLabel", label: "Knoptekst (leeg = geen knop)" },
-    { k: "ctaUrl", label: "Knop-URL" },
+    { k: "subject", label: t("emailtemplates.field.subject") },
+    { k: "greeting", label: t("emailtemplates.field.greeting"), placeholder: "Beste" },
+    { k: "sender", label: t("emailtemplates.field.sender") },
+    { k: "role", label: t("emailtemplates.field.role") },
+    { k: "email", label: t("emailtemplates.field.email") },
+    { k: "phone", label: t("emailtemplates.field.phone") },
+    { k: "handle", label: t("emailtemplates.field.handle"), placeholder: "rout.be/jona" },
+    { k: "ctaLabel", label: t("emailtemplates.field.ctaLabel") },
+    { k: "ctaUrl", label: t("emailtemplates.field.ctaUrl") },
   ];
 
   return (
     <AppLayout
-      title="E-mailtemplates"
-      description="Twee schone HTML-mails in ROUT-huisstijl: persoonlijk (jona@rout.be) en team (hallo@rout.be). Tabelgebaseerd, inline CSS, geen tracking."
-      crumbs={[{ label: "E-mailtemplates" }]}
+      title={t("emailtemplates.title")}
+      description={t("emailtemplates.description")}
+      crumbs={[{ label: t("emailtemplates.title") }]}
     >
       <div className="grid gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         <div className="space-y-4">
@@ -262,7 +264,7 @@ export default function EmailTemplatesPage() {
                 className="flex-1"
                 onClick={() => pick(v)}
               >
-                {v === "personal" ? "Jona" : "Team"}
+                {v === "personal" ? t("emailtemplates.variant.personal") : t("emailtemplates.variant.team")}
               </Button>
             ))}
           </div>
@@ -280,7 +282,7 @@ export default function EmailTemplatesPage() {
           ))}
 
           <div className="space-y-1.5">
-            <Label htmlFor="body">Berichttekst</Label>
+            <Label htmlFor="body">{t("emailtemplates.field.body")}</Label>
             <textarea
               id="body"
               value={data.body}
@@ -288,7 +290,7 @@ export default function EmailTemplatesPage() {
               className="h-40 w-full rounded-xl border border-border bg-background p-3 text-sm"
             />
             <p className="text-xs text-muted-foreground">
-              Lege regel = nieuwe alinea.
+              {t("emailtemplates.field.bodyHint")}
             </p>
           </div>
         </div>
@@ -305,10 +307,10 @@ export default function EmailTemplatesPage() {
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={copy}>
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              Kopieer Raw HTML
+              {t("emailtemplates.copyCta")}
             </Button>
             <span className="text-xs text-muted-foreground">
-              Infomaniak Mail → nieuw bericht → HTML-bron plakken.
+              {t("emailtemplates.copyHint")}
             </span>
           </div>
 
