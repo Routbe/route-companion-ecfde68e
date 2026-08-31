@@ -24,6 +24,7 @@ import { Route as GiftRouteImport } from './routes/gift'
 import { Route as GoRouteImport } from './routes/go'
 import { Route as HubRouteImport } from './routes/hub'
 import { Route as IbanQrRouteImport } from './routes/iban-qr'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManifestoRouteImport } from './routes/manifesto'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -167,6 +168,11 @@ const HubRoute = HubRouteImport.update({
 const IbanQrRoute = IbanQrRouteImport.update({
   id: '/iban-qr',
   path: '/iban-qr',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManifestoRoute = ManifestoRouteImport.update({
@@ -550,6 +556,7 @@ export interface FileRoutesByFullPath {
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
+  '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -636,6 +643,7 @@ export interface FileRoutesByTo {
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
+  '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -724,6 +732,7 @@ export interface FileRoutesById {
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
+  '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -812,6 +821,7 @@ export interface FileRouteTypes {
     | '/go'
     | '/hub'
     | '/iban-qr'
+    | '/login'
     | '/manifesto'
     | '/onboarding'
     | '/privacy'
@@ -898,6 +908,7 @@ export interface FileRouteTypes {
     | '/go'
     | '/hub'
     | '/iban-qr'
+    | '/login'
     | '/manifesto'
     | '/onboarding'
     | '/privacy'
@@ -985,6 +996,7 @@ export interface FileRouteTypes {
     | '/go'
     | '/hub'
     | '/iban-qr'
+    | '/login'
     | '/manifesto'
     | '/onboarding'
     | '/privacy'
@@ -1073,6 +1085,7 @@ export interface RootRouteChildren {
   GoRoute: typeof GoRoute
   HubRoute: typeof HubRoute
   IbanQrRoute: typeof IbanQrRoute
+  LoginRoute: typeof LoginRoute
   ManifestoRoute: typeof ManifestoRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -1225,6 +1238,13 @@ declare module '@tanstack/react-router' {
       path: '/iban-qr'
       fullPath: '/iban-qr'
       preLoaderRoute: typeof IbanQrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manifesto': {
@@ -1876,6 +1896,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoRoute: GoRoute,
   HubRoute: HubRoute,
   IbanQrRoute: IbanQrRoute,
+  LoginRoute: LoginRoute,
   ManifestoRoute: ManifestoRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
