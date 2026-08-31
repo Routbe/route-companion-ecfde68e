@@ -207,7 +207,7 @@ export default function Claim() {
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-5">
           <div className="flex min-h-44 w-full max-w-md items-center justify-center rounded-2xl border border-border bg-card">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Account wordt gecontroleerd…
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> {t("claim.loading.checkingAccount")}
             </p>
           </div>
         </div>
@@ -220,12 +220,12 @@ export default function Claim() {
       <AppLayout>
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-5 text-center">
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8">
-            <h1 className="font-display text-2xl">Accountcontrole mislukt</h1>
+            <h1 className="font-display text-2xl">{t("claim.error.checkFailed.title")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              We konden niet veilig bepalen of je al een handle hebt. Probeer het opnieuw.
+              {t("claim.error.checkFailed.body")}
             </p>
             <Button className="mt-6" onClick={() => setProfileAttempt((value) => value + 1)}>
-              Opnieuw proberen
+{t("claim.error.checkFailed.retry")}
             </Button>
           </div>
         </div>

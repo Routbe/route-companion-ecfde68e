@@ -82,7 +82,7 @@ function Sparkline({ data }: { data: number[] }) {
  * /studio), which keeps this route light on mobile.
  */
 export default function Dashboard() {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [totals, setTotals] = useState<Totals | null>(null);
@@ -195,9 +195,9 @@ export default function Dashboard() {
 
   if (loading || !user) {
     return (
-      <AppLayout title="Dashboard">
+      <AppLayout title={t("dashboard.title")}>
         <div className="flex min-h-[40vh] items-center justify-center">
-          <div className="relative h-24 w-24"><BrandLoader label="Dashboard laden…" /></div>
+          <div className="relative h-24 w-24"><BrandLoader label={t("dashboard.loading")} /></div>
         </div>
       </AppLayout>
     );
@@ -205,38 +205,38 @@ export default function Dashboard() {
 
   return (
     <AppLayout
-      title="Dashboard"
-      description="Your QR codes, short links and aggregated scan analytics."
-      crumbs={[{ label: "Dashboard" }]}
+      title={t("dashboard.title")}
+      description={t("dashboard.description")}
+      crumbs={[{ label: t("dashboard.title") }]}
       actions={
         <>
           <div className="hidden flex-wrap gap-2 sm:flex">
             <Button asChild size="sm" variant="outline" className="gap-1.5">
               <Link to="/dashboard/profile">
-                <UserRound className="h-4 w-4" /> Profile
+                <UserRound className="h-4 w-4" /> {t("dashboard.profile")}
               </Link>
             </Button>
             <Button asChild size="sm" variant="outline" className="gap-1.5">
               <Link to="/studio">
-                <Sparkles className="h-4 w-4" /> Open Studio
+                <Sparkles className="h-4 w-4" /> {t("dashboard.openStudio")}
               </Link>
             </Button>
 
             <Button asChild size="sm" className="gap-1.5">
               <Link to="/">
-                <Plus className="h-4 w-4" /> New QR
+                <Plus className="h-4 w-4" /> {t("dashboard.newQr")}
               </Link>
             </Button>
           </div>
           <div className="flex w-full gap-2 sm:hidden mt-3">
             <Button asChild size="sm" variant="outline" className="flex-1 gap-1.5">
               <Link to="/studio">
-                <Sparkles className="h-4 w-4" /> Open Studio
+                <Sparkles className="h-4 w-4" /> {t("dashboard.openStudio")}
               </Link>
             </Button>
             <Button asChild size="sm" className="flex-1 gap-1.5 bg-primary text-primary-foreground">
               <Link to="/">
-                <Plus className="h-4 w-4" /> New QR
+                <Plus className="h-4 w-4" /> {t("dashboard.newQr")}
               </Link>
             </Button>
           </div>
@@ -246,16 +246,16 @@ export default function Dashboard() {
       <IdentityCard />
 
       <section aria-label="Analytics" className="mb-4 grid grid-cols-3 gap-2 sm:gap-3">
-        <Metric label="Saved QRs" value={totals?.saved ?? "—"} />
-        <Metric label="Short links" value={totals?.tracked ?? "—"} hint="Repointable" />
-        <Metric label="Total scans" value={totals?.scans ?? "—"} hint="Cookie-free" />
+        <Metric label={t("dashboard.metric.saved")} value={totals?.saved ?? "—"} />
+        <Metric label={t("dashboard.metric.shortLinks")} value={totals?.tracked ?? "—"} hint={t("dashboard.metric.repointable")} />
+        <Metric label={t("dashboard.metric.totalScans")} value={totals?.scans ?? "—"} hint={t("dashboard.metric.cookieFree")} />
       </section>
 
       <section className="mb-4 rounded-2xl border border-border bg-card p-3.5 sm:p-5">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3">
-          <h2 className="truncate text-sm font-medium">Scans · last 14 days</h2>
+          <h2 className="truncate text-sm font-medium">{t("dashboard.scansLast14")}</h2>
           <span className="shrink-0 text-xs text-muted-foreground">
-            {totals ? totals.trend.reduce((a, b) => a + b, 0) : 0} scans
+            {t("dashboard.scansCount", { count: totals ? totals.trend.reduce((a, b) => a + b, 0) : 0 })}
           </span>
         </div>
         <div className="mt-3">
@@ -263,8 +263,7 @@ export default function Dashboard() {
             <Sparkline data={totals!.trend} />
           ) : (
             <p className="py-4 text-xs text-muted-foreground">
-              No scans during this period. As soon as someone scans a dynamic QR, the trend will
-              appear here.
+              {t("dashboard.noScansPeriod")}
             </p>
           )}
         </div>
@@ -272,12 +271,12 @@ export default function Dashboard() {
 
       <section className="mb-4 rounded-2xl border border-border bg-card p-3.5 sm:p-5">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-medium">Recent QR Codes</h2>
+          <h2 className="text-sm font-medium">{t("dashboard.recentQrCodes")}</h2>
           <Link
             to="/dashboard/qrs"
             className="shrink-0 text-xs font-medium text-primary hover:underline"
           >
-            View all →
+            {t("dashboard.viewAll")}
           </Link>
         </div>
         {!recent ? (
@@ -286,7 +285,7 @@ export default function Dashboard() {
           </div>
         ) : recent.length === 0 ? (
           <div className="rounded-xl bg-muted/40 p-6 text-center text-xs text-muted-foreground">
-            No QR codes created yet. Click &lsquo;+ New QR&rsquo; above to generate your first code.
+            {t("dashboard.noQrCodes")}
           </div>
         ) : (
           <div className="space-y-2">
@@ -302,7 +301,7 @@ export default function Dashboard() {
                     <span aria-hidden>·</span>
                     <span>{formatDate(item.created_at, locale)}</span>
                     <span aria-hidden>·</span>
-                    <span>{item.scans} scans</span>
+                    <span>{t("dashboard.itemScans", { count: item.scans })}</span>
                   </p>
                 </div>
                 <DropdownMenu>
@@ -311,7 +310,7 @@ export default function Dashboard() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 shrink-0"
-                      aria-label="Actions"
+                      aria-label={t("dashboard.actions")}
                     >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -319,23 +318,23 @@ export default function Dashboard() {
                   <DropdownMenuContent align="end" className="bg-card">
                     <DropdownMenuItem asChild className="gap-2">
                       <Link to="/">
-                        <Edit3 className="h-4 w-4" /> Edit
+                        <Edit3 className="h-4 w-4" /> {t("dashboard.edit")}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="gap-2"
                       onClick={() => {
                         void navigator.clipboard.writeText(window.location.origin);
-                        toast.success("URL copied!");
+                        toast.success(t("dashboard.urlCopied"));
                       }}
                     >
-                      <Copy className="h-4 w-4" /> Copy URL
+                      <Copy className="h-4 w-4" /> {t("dashboard.copyUrl")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="gap-2"
-                      onClick={() => toast.info("Preparing PNG…")}
+                      onClick={() => toast.info(t("dashboard.preparingPng"))}
                     >
-                      <Download className="h-4 w-4" /> Download PNG
+                      <Download className="h-4 w-4" /> {t("dashboard.downloadPng")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -347,15 +346,14 @@ export default function Dashboard() {
 
       <section className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border bg-muted/30 p-3.5 sm:mb-8 sm:p-5">
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-foreground">Use your own custom domain</p>
+          <p className="truncate text-sm font-medium text-foreground">{t("dashboard.customDomain.title")}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Show <span className="font-mono">links.yourbrand.com</span> on scans instead of our
-            domain.
+            {t("dashboard.customDomain.body", { domain: "links.yourbrand.com" })}
           </p>
         </div>
         <Button asChild size="sm" variant="outline" className="shrink-0 gap-1.5">
           <Link to="/dashboard/domains">
-            <Globe className="h-4 w-4" /> 🌐 Connect domain
+            <Globe className="h-4 w-4" /> {t("dashboard.customDomain.cta")}
           </Link>
         </Button>
       </section>

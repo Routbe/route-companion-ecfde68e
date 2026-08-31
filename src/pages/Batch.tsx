@@ -19,6 +19,7 @@ import { FormatSelector, QRFormat } from "@/components/FormatSelector";
 import { DPISelector, mmToPx } from "@/components/DPISelector";
 import { getQRBlob, applyFilenameTokens } from "@/lib/qrGenerator";
 import { cn, errorMessage } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 interface BatchRow {
   value: string;
@@ -26,9 +27,9 @@ interface BatchRow {
 }
 
 const PRESETS = {
-  mono: { label: "Default (Monochrome)", fg: "#000000", bg: "#FFFFFF" },
-  brand: { label: "Standard Brand Style", fg: "#101010", bg: "#F5F2EC" },
-  studio: { label: "Studio Profile (saved style)", fg: "#0B3D2E", bg: "#FFFFFF" },
+  mono: { labelKey: "batch.preset.mono", fg: "#000000", bg: "#FFFFFF" },
+  brand: { labelKey: "batch.preset.brand", fg: "#101010", bg: "#F5F2EC" },
+  studio: { labelKey: "batch.preset.studio", fg: "#0B3D2E", bg: "#FFFFFF" },
 } as const;
 
 type PresetId = keyof typeof PRESETS;
@@ -65,6 +66,7 @@ function parseCSV(text: string): BatchRow[] {
 }
 
 export default function Batch() {
+  const { t } = useI18n();
   const [text, setText] = useState(DEFAULT_TEXT);
   const [csvRows, setCsvRows] = useState<BatchRow[]>([]);
   const [source, setSource] = useState<"paste" | "csv">("paste");
@@ -135,7 +137,7 @@ export default function Batch() {
     const parsed = parseCSV(await f.text());
     setCsvRows(parsed);
     setSource("csv");
-    toast.success(`Loaded ${parsed.length} rows from CSV`);
+    toast.success(t("batch.toast.csvLoaded", { count: parsed.length }));
   };
 
   const insertToken = (token: string) => {
@@ -156,7 +158,7 @@ export default function Batch() {
   };
 
   const generate = async () => {
-    if (!rows.length) return toast.error("Add values first");
+    if (!rows.length) return toast.error(t("batch.toast.addValuesFirst"));
     setBusy(true);
     setProgress(0);
     try {
@@ -186,9 +188,9 @@ export default function Batch() {
       a.download = `qr-batch-${Date.now()}.zip`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(`Downloaded ${rows.length} QR codes`);
+      toast.success(t("batch.toast.downloaded", { count: rows.length }));
     } catch (e: unknown) {
-      toast.error(errorMessage(e, "Batch generation failed"));
+      toast.error(errorMessage(e, t("batch.toast.generationFailed")));
     } finally {
       setBusy(false);
     }
@@ -198,17 +200,17 @@ export default function Batch() {
 
   return (
     <AppLayout
-      title="Batch generator"
-      description="Paste a list of links or upload a CSV — get a ZIP containing high-res QR codes."
-      crumbs={[{ label: "Batch" }]}
+      title={t("batch.title")}
+      description={t("batch.description")}
+      crumbs={[{ label: t("batch.crumb") }]}
     >
       <div className="mx-auto max-w-2xl space-y-6 px-4 py-6">
         {/* 1 — Input */}
         <div className={card}>
           <Tabs value={source} onValueChange={(v) => setSource(v as "paste" | "csv")}>
             <TabsList className="mb-4 grid w-full grid-cols-2">
-              <TabsTrigger value="paste">Paste list</TabsTrigger>
-              <TabsTrigger value="csv">CSV upload</TabsTrigger>
+              <TabsTrigger value="paste">{t("batch.tabs.paste")}</TabsTrigger>
+              <TabsTrigger value="csv">{t("batch.tabs.csv")}</TabsTrigger>
             </TabsList>
             <TabsContent value="paste" className="space-y-2">
               <Textarea
@@ -219,21 +221,21 @@ export default function Batch() {
               />
               <p className="font-mono text-xs text-muted-foreground">
                 {pastedRows.length > 0
-                  ? `${pastedRows.length} URLs detected`
-                  : "No valid URLs detected"}
+                  ? t("batch.paste.detected", { count: pastedRows.length })
+                  : t("batch.paste.noneDetected")}
               </p>
             </TabsContent>
             <TabsContent value="csv" className="space-y-2">
               <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-6 hover:bg-muted/40">
                 <Upload className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">Click to select CSV</span>
+                <span className="text-sm">{t("batch.csv.selectPrompt")}</span>
                 <span className="text-[11px] text-muted-foreground">
-                  Columns: <code>value</code>, <code>name</code> (optional)
+                  {t("batch.csv.columnsHint")}
                 </span>
                 <input type="file" accept=".csv,text/csv" className="hidden" onChange={onCsv} />
               </label>
               <p className="font-mono text-xs text-muted-foreground">
-                {csvRows.length > 0 ? `${csvRows.length} rows detected` : "No valid rows detected"}
+                {csvRows.length > 0 ? t("batch.csv.detected", { count: csvRows.length }) : t("batch.csv.noneDetected")}
               </p>
             </TabsContent>
           </Tabs>
@@ -253,7 +255,7 @@ export default function Batch() {
               ))}
               {rows.length > 50 && (
                 <div className="px-3 py-1.5 text-muted-foreground">
-                  …and {rows.length - 50} more
+                  {t("batch.andMore", { count: rows.length - 50 })}
                 </div>
               )}
             </div>
@@ -262,7 +264,7 @@ export default function Batch() {
 
         {/* 2 — Design preset */}
         <div className={cn(card, "space-y-2")}>
-          <Label className="text-sm">Design preset</Label>
+          <Label className="text-sm">{t("batch.designPreset")}</Label>
           <Select value={preset} onValueChange={(v) => setPreset(v as PresetId)}>
             <SelectTrigger className="h-11 rounded-lg">
               <SelectValue />
@@ -270,7 +272,7 @@ export default function Batch() {
             <SelectContent>
               {(Object.keys(PRESETS) as PresetId[]).map((k) => (
                 <SelectItem key={k} value={k}>
-                  {PRESETS[k].label}
+                  {t(PRESETS[k].labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -287,14 +289,14 @@ export default function Batch() {
         {/* 3 — Export specifications */}
         <div className={cn(card, "space-y-4")}>
           <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Export specifications
+            {t("batch.exportSpecs")}
           </p>
           <div className="space-y-2">
-            <Label className="text-sm">Format</Label>
+            <Label className="text-sm">{t("batch.format")}</Label>
             <FormatSelector value={format} onChange={setFormat} />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm">Size &amp; DPI</Label>
+            <Label className="text-sm">{t("batch.sizeDpi")}</Label>
             <DPISelector
               pixelSize={pixelSize}
               onPixelSizeChange={setPixelSize}
@@ -307,7 +309,7 @@ export default function Batch() {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-sm">Filename pattern</Label>
+            <Label className="text-sm">{t("batch.filenamePattern")}</Label>
             <Input
               ref={patternRef}
               value={pattern}
@@ -327,8 +329,7 @@ export default function Batch() {
               ))}
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Tokens: <code>{"{index}"}</code>, <code>{"{value}"}</code>, <code>{"{name}"}</code>.
-              Use <code>{"{name|value}"}</code> to fallback to value if name is empty.
+              {t("batch.tokensHint")}
             </p>
           </div>
         </div>
@@ -347,7 +348,7 @@ export default function Batch() {
           </div>
           <div className="min-w-0">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Sample preview
+              {t("batch.samplePreview")}
             </p>
             <p className="mt-1 truncate font-mono text-sm text-foreground">
               {sampleName}.{ext}
@@ -366,11 +367,11 @@ export default function Batch() {
         >
           {busy ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating… {progress}%
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("batch.generating", { progress })}
             </>
           ) : (
             <>
-              <Package className="mr-2 h-4 w-4" /> Generate {rows.length || ""} QR codes as ZIP
+              <Package className="mr-2 h-4 w-4" /> {t("batch.generateCta", { count: rows.length || "" })}
             </>
           )}
         </Button>

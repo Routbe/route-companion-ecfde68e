@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n";
 
 interface SigData {
   name: string;
@@ -79,6 +80,7 @@ function buildHtml(d: SigData): string {
 }
 
 export default function SignaturePage() {
+  const { t } = useI18n();
   const [data, setData] = useState<SigData>({
     name: "Jona Delplanche",
     role: "Founder — ROUT",
@@ -98,28 +100,28 @@ export default function SignaturePage() {
     try {
       await navigator.clipboard.writeText(html);
       setCopied(true);
-      toast.success("Raw HTML gekopieerd — plak in Infomaniak > Handtekening (HTML)");
+      toast.success(t("signature.toast.copied"));
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      toast.error("Kopiëren mislukt — selecteer de code handmatig");
+      toast.error(t("signature.toast.copyFailed"));
     }
   };
 
   const fields: Array<{ k: keyof SigData; label: string; placeholder?: string }> = [
-    { k: "name", label: "Naam" },
-    { k: "role", label: "Functie" },
-    { k: "email", label: "E-mail" },
-    { k: "phone", label: "Telefoon" },
-    { k: "website", label: "Website", placeholder: "https://rout.be" },
-    { k: "avatar", label: "Avatar-URL (publiek)", placeholder: "https://…/avatar.png" },
-    { k: "handle", label: "Link-in-bio badge", placeholder: "rout.be/jona" },
+    { k: "name", label: t("signature.field.name") },
+    { k: "role", label: t("signature.field.role") },
+    { k: "email", label: t("signature.field.email") },
+    { k: "phone", label: t("signature.field.phone") },
+    { k: "website", label: t("signature.field.website"), placeholder: "https://rout.be" },
+    { k: "avatar", label: t("signature.field.avatar"), placeholder: "https://…/avatar.png" },
+    { k: "handle", label: t("signature.field.handle"), placeholder: "rout.be/jona" },
   ];
 
   return (
     <AppLayout
-      title="E-mailhandtekening"
-      description="Genereer een tabelgebaseerde HTML-handtekening voor Infomaniak. Inline CSS, geen externe stylesheets."
-      crumbs={[{ label: "Handtekening" }]}
+      title={t("signature.pageTitle")}
+      description={t("signature.pageDescription")}
+      crumbs={[{ label: t("signature.crumb") }]}
     >
       <div className="grid gap-8 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         <div className="space-y-4">
@@ -136,8 +138,8 @@ export default function SignaturePage() {
           ))}
           <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
             <div>
-              <p className="text-sm font-medium">Micro QR i.p.v. avatar</p>
-              <p className="text-xs text-muted-foreground">60×60 QR naar je website</p>
+              <p className="text-sm font-medium">{t("signature.microQr.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("signature.microQr.body")}</p>
             </div>
             <Switch checked={data.useQr} onCheckedChange={(v) => set("useQr")(v)} />
           </div>
@@ -145,7 +147,7 @@ export default function SignaturePage() {
 
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-white p-6">
-            <p className="mb-3 text-xs uppercase tracking-widest text-neutral-500">Live view</p>
+            <p className="mb-3 text-xs uppercase tracking-widest text-neutral-500">{t("signature.liveView")}</p>
             <iframe
               title="Handtekening preview"
               srcDoc={`<!doctype html><html><body style="margin:0;padding:4px;background:#ffffff;">${html}</body></html>`}
@@ -156,10 +158,10 @@ export default function SignaturePage() {
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={copy}>
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              Kopieer Raw HTML
+              {t("signature.copyRawHtml")}
             </Button>
             <span className="text-xs text-muted-foreground">
-              Plakken in Infomaniak: Mail → Instellingen → Handtekening → HTML-modus.
+              {t("signature.pasteHint")}
             </span>
           </div>
 

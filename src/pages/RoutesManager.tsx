@@ -11,12 +11,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { getMyHandle } from "@/lib/claim.functions";
 import { useUrlStyle } from "@/hooks/useUrlStyle";
 import { styledProfileLabel, styledProfilePath } from "@/lib/profile-url";
+import { useI18n } from "@/lib/i18n";
 
 /**
  * Post-claim management surface: the claimed handle, every active route
  * (static QR + tracked links) and the linked e-mail addresses.
  */
 export default function RoutesManager() {
+  const { t } = useI18n();
   const nav = useNavigate();
   const { user, loading } = useAuth();
   const [handle, setHandle] = useState<string | null>(null);
@@ -47,9 +49,9 @@ export default function RoutesManager() {
       <main className="mx-auto w-full max-w-5xl px-4 py-10">
         <header className="border-b border-border pb-6">
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Your namespace
+            {t("routesmanager.namespace")}
           </p>
-          <h1 className="mt-2 font-display text-3xl text-foreground">Routes & e-mail</h1>
+          <h1 className="mt-2 font-display text-3xl text-foreground">{t("routesmanager.title")}</h1>
 
           {resolving ? (
             <Loader2 className="mt-4 h-4 w-4 animate-spin text-muted-foreground" aria-hidden />
@@ -68,10 +70,10 @@ export default function RoutesManager() {
           ) : (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-sm text-muted-foreground">
-                You have not claimed a handle yet.
+                {t("routesmanager.noHandle")}
               </p>
               <Button asChild className="h-10 rounded-lg">
-                <Link to="/claim">Claim your handle</Link>
+                <Link to="/claim">{t("routesmanager.claimCta")}</Link>
               </Button>
             </div>
           )}
@@ -79,7 +81,7 @@ export default function RoutesManager() {
 
         <section className="mt-8">
           <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Linked e-mail
+            {t("routesmanager.linkedEmail")}
           </h2>
           <EmailForwardingPanel />
           <div className="mt-4">
@@ -92,7 +94,7 @@ export default function RoutesManager() {
 
         <section className="mt-10">
           <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Active routes
+            {t("routesmanager.activeRoutes")}
           </h2>
           <QrsPanel />
         </section>

@@ -28,14 +28,17 @@ import {
 import { handleLengthMessage, normalizeHandleForStorage } from "@/lib/handle-rules";
 import { strictHandleIssue } from "@/lib/handle-validation";
 import { HandleErrorBanner } from "@/components/HandleValidationMessage";
+import { useI18n } from "@/lib/i18n";
 
 /** Wizardstappen — de voortgangsbalk bovenaan volgt exact deze volgorde. */
-const STEPS = [
-  { id: 1, title: "Handle & identiteit" },
-  { id: 2, title: "Foto & bio" },
-  { id: 3, title: "Thema & lettertype" },
-  { id: 4, title: "Sociale handles" },
-] as const;
+function useSteps(t: (key: string) => string) {
+  return [
+    { id: 1, title: t("onboarding.steps.handle") },
+    { id: 2, title: t("onboarding.steps.photo") },
+    { id: 3, title: t("onboarding.steps.theme") },
+    { id: 4, title: t("onboarding.steps.socials") },
+  ] as const;
+}
 
 /** De vier snelle sociale velden uit stap 4. */
 const SOCIALS = [
@@ -71,6 +74,8 @@ function readOAuthMeta(meta: Record<string, unknown> | undefined) {
  * een live voorbeeld dat bij elke klik mee verandert.
  */
 export default function Onboarding() {
+  const { t } = useI18n();
+  const STEPS = useSteps(t);
   const nav = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
@@ -191,7 +196,7 @@ export default function Onboarding() {
     try {
       const claim = await claimHandle({ data: { handle: normalized, turnstileToken: botToken } });
       if (!claim.ok) {
-        notifyError(claim.reason ?? "Deze handle kon niet gereserveerd worden.");
+        notifyError(claim.reason ?? t("onboarding.errors.claimFailed"));
         setStep(1);
         return;
       }
@@ -208,13 +213,13 @@ export default function Onboarding() {
         },
       });
       if (!saved.ok) {
-        notifyError(saved.reason ?? "Opslaan mislukte.");
+        notifyError(saved.reason ?? t("onboarding.errors.saveFailed"));
         return;
       }
-      notifySuccess("Je ROUT-profiel staat klaar.");
+      notifySuccess(t("onboarding.success.profileReady"));
       nav("/studio", { replace: true });
     } catch {
-      notifyError("Opslaan mislukte. Probeer het opnieuw.");
+      notifyError(t("onboarding.errors.saveFailedRetry"));
     } finally {
       setSaving(false);
     }
@@ -223,9 +228,9 @@ export default function Onboarding() {
   return (
     <AppLayout
       width="wide"
-      title="Welkom bij ROUT"
-      description="Vier stappen en je soevereine profiel staat live."
-      crumbs={[{ label: "Onboarding" }]}
+      title={t("onboarding.page.title")}
+      description={t("onboarding.page.description")}
+      crumbs={[{ label: t("onboarding.page.crumb") }]}
     >
       {authLoading || !user ? (
         <div className="flex min-h-[40vh] items-center justify-center">
@@ -261,14 +266,14 @@ export default function Onboarding() {
               {step === 1 ? (
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-medium">Claim je handle</h2>
+                    <h2 className="text-xl font-medium">{t("onboarding.step1.title")}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Dit wordt je adres: rout.be/{normalized || "jouwhandle"}
+                      {t("onboarding.step1.addressPrefix")}rout.be/{normalized || t("onboarding.step1.handlePlaceholder")}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="handle">Handle</Label>
+                    <Label htmlFor="handle">{t("onboarding.step1.handleLabel")}</Label>
                     <div className="relative">
                       <Input
                         id="handle"
@@ -277,7 +282,7 @@ export default function Onboarding() {
                         autoCorrect="off"
                         spellCheck={false}
                         onChange={(e) => setHandle(e.target.value)}
-                        placeholder="jouw.naam42"
+                        placeholder={t("onboarding.step1.handleInputPlaceholder")}
                         className="h-12 pr-10"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -317,13 +322,13 @@ export default function Onboarding() {
                       [
                         {
                           id: "free" as const,
-                          title: "Gratis alias",
-                          note: "Direct live op rout.be/u/ met je eigen handle.",
+                          title: t("onboarding.step1.tierFree.title"),
+                          note: t("onboarding.step1.tierFree.note"),
                         },
                         {
                           id: "pro" as const,
-                          title: "Verified Pro",
-                          note: "Blauw vinkje en schone namespace na verificatie.",
+                          title: t("onboarding.step1.tierPro.title"),
+                          note: t("onboarding.step1.tierPro.note"),
                         },
                       ]
                     ).map((option) => (
@@ -354,9 +359,9 @@ export default function Onboarding() {
               {step === 2 ? (
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-medium">Profielfoto & bio</h2>
+                    <h2 className="text-xl font-medium">{t("onboarding.step2.title")}</h2>
                     <p className="text-sm text-muted-foreground">
-                      We laadden alvast je foto en naam uit je login.
+                      {t("onboarding.step2.body")}
                     </p>
                   </div>
 
@@ -364,7 +369,7 @@ export default function Onboarding() {
                     {avatarUrl ? (
                       <img
                         src={avatarUrl}
-                        alt="Profielfoto"
+                        alt={t("onboarding.step2.avatarAlt")}
                         className="h-16 w-16 rounded-full object-cover"
                       />
                     ) : (
@@ -380,7 +385,7 @@ export default function Onboarding() {
                         onClick={() => setAvatarUrl(oauthAvatar)}
                         disabled={!oauthAvatar || avatarUrl === oauthAvatar}
                       >
-                        Behouden
+                        {t("onboarding.step2.keep")}
                       </Button>
                       <Button
                         type="button"
@@ -388,14 +393,14 @@ export default function Onboarding() {
                         size="sm"
                         onClick={() => setAvatarUrl("")}
                       >
-                        Vervangen
+                        {t("onboarding.step2.replace")}
                       </Button>
                     </div>
                   </div>
 
                   {avatarUrl !== oauthAvatar ? (
                     <div className="space-y-2">
-                      <Label htmlFor="avatar">Eigen afbeeldings-URL</Label>
+                      <Label htmlFor="avatar">{t("onboarding.step2.customUrlLabel")}</Label>
                       <Input
                         id="avatar"
                         value={avatarUrl}
@@ -407,7 +412,7 @@ export default function Onboarding() {
                   ) : null}
 
                   <div className="space-y-2">
-                    <Label htmlFor="display-name">Weergavenaam</Label>
+                    <Label htmlFor="display-name">{t("onboarding.step2.displayNameLabel")}</Label>
                     <Input
                       id="display-name"
                       value={displayName}
@@ -418,13 +423,13 @@ export default function Onboarding() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bio">Korte bio</Label>
+                    <Label htmlFor="bio">{t("onboarding.step2.bioLabel")}</Label>
                     <Textarea
                       id="bio"
                       value={bio}
                       onChange={(e) => setBio(e.target.value.slice(0, 200))}
                       rows={3}
-                      placeholder="Waar sta je voor?"
+                      placeholder={t("onboarding.step2.bioPlaceholder")}
                     />
                     <p className="text-xs text-muted-foreground">{bio.length}/200</p>
                   </div>
@@ -434,9 +439,9 @@ export default function Onboarding() {
               {step === 3 ? (
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-medium">Thema & lettertype</h2>
+                    <h2 className="text-xl font-medium">{t("onboarding.step3.title")}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Kies je stijl — het voorbeeld verandert meteen mee.
+                      {t("onboarding.step3.body")}
                     </p>
                   </div>
 
@@ -483,9 +488,9 @@ export default function Onboarding() {
               {step === 4 ? (
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <h2 className="text-xl font-medium">Sociale handles</h2>
+                    <h2 className="text-xl font-medium">{t("onboarding.step4.title")}</h2>
                     <p className="text-sm text-muted-foreground">
-                      Alleen je gebruikersnaam — plak gerust een volledige URL.
+                      {t("onboarding.step4.body")}
                     </p>
                   </div>
 
@@ -513,7 +518,7 @@ export default function Onboarding() {
                   disabled={step === 1 || saving}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Terug
+                  {t("onboarding.nav.back")}
                 </Button>
 
                 {step < STEPS.length ? (
@@ -522,7 +527,7 @@ export default function Onboarding() {
                     onClick={() => setStep((s) => Math.min(STEPS.length, s + 1))}
                     disabled={!canContinue}
                   >
-                    Volgende
+                    {t("onboarding.nav.next")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 ) : (
@@ -530,7 +535,7 @@ export default function Onboarding() {
                     {saving ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : null}
-                    Naar mijn Studio ➔
+{t("onboarding.nav.finish")}
                   </Button>
                 )}
               </div>
@@ -540,7 +545,7 @@ export default function Onboarding() {
           {/* Live preview */}
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Live voorbeeld
+              {t("onboarding.preview.label")}
             </p>
             <div
               className="overflow-hidden rounded-[2rem] border border-border shadow-lg"

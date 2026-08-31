@@ -18,9 +18,11 @@ import {
   clampGiftAmount,
   euro,
 } from "@/lib/gift-cards";
+import { useI18n } from "@/lib/i18n";
 
 /** Publieke aankooppagina voor cadeaubonnen, met live 3D-voorbeeld. */
 export default function GiftCards() {
+  const { t } = useI18n();
   const buy = useServerFn(startGiftCardPurchase);
   const [amount, setAmount] = useState<number>(2500);
   const [customAmount, setCustomAmount] = useState("");
@@ -37,9 +39,9 @@ export default function GiftCards() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("status") === "success") {
-      toast.success("Bedankt! Je cadeaubon is onderweg per e-mail.");
+      toast.success(t("giftcards.toast.success"));
     } else if (params.get("status") === "cancelled") {
-      toast.info("Aankoop geannuleerd — er is niets afgerekend.");
+      toast.info(t("giftcards.toast.cancelled"));
     }
   }, []);
 
@@ -50,7 +52,7 @@ export default function GiftCards() {
 
   async function submit() {
     if (!purchaserEmail) {
-      toast.error("Vul je eigen e-mailadres in voor de factuur.");
+      toast.error(t("giftcards.toast.emailRequired"));
       return;
     }
     setBusy(true);
@@ -71,16 +73,16 @@ export default function GiftCards() {
       });
       if (!result.ok) {
         const messages: Record<string, string> = {
-          shipping_country_unsupported: "Gratis fysieke levering geldt alleen binnen België.",
-          shipping_address_incomplete: "Vul straat, postcode en gemeente in voor fysieke levering.",
-          stripe_not_configured: "Betalen is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
+          shipping_country_unsupported: t("giftcards.error.shippingCountry"),
+          shipping_address_incomplete: t("giftcards.error.shippingAddress"),
+          stripe_not_configured: t("giftcards.error.stripeNotConfigured"),
         };
-        toast.error(messages[result.reason] ?? "Aankoop mislukt. Probeer het opnieuw.");
+        toast.error(messages[result.reason] ?? t("giftcards.error.generic"));
         return;
       }
       window.location.href = result.url;
     } catch {
-      toast.error("Aankoop mislukt. Probeer het opnieuw.");
+      toast.error(t("giftcards.error.generic"));
     } finally {
       setBusy(false);
     }
@@ -91,21 +93,20 @@ export default function GiftCards() {
       <div className="mx-auto w-full max-w-5xl px-4 py-12">
         <header className="mb-10 max-w-2xl">
           <p className="flex items-center gap-2 text-xs uppercase tracking-[0.28em] text-muted-foreground">
-            <Gift className="h-4 w-4" /> Cadeaubon
+            <Gift className="h-4 w-4" /> {t("giftcards.eyebrow")}
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Geef ROUT cadeau
+            {t("giftcards.title")}
           </h1>
           <p className="mt-3 text-muted-foreground">
-            De ontvanger krijgt de bon digitaal per mail (PDF + 3D-weergave) en kan de code meteen
-            gebruiken bij het afrekenen. In België sturen we de bon ook gratis fysiek op.
+            {t("giftcards.subtitle")}
           </p>
         </header>
 
         <div className="grid gap-10 lg:grid-cols-[1fr_420px]">
           <div className="space-y-8">
             <section className="space-y-3">
-              <Label>Bedrag</Label>
+              <Label>{t("giftcards.form.amount")}</Label>
               <div className="flex flex-wrap gap-2">
                 {GIFT_PRESETS.map((cents) => (
                   <Button
@@ -123,18 +124,18 @@ export default function GiftCards() {
                 <Input
                   className="w-36"
                   inputMode="decimal"
-                  placeholder="Ander bedrag"
+                  placeholder={t("giftcards.form.customAmount")}
                   value={customAmount}
                   onChange={(e) => setCustomAmount(e.target.value)}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Tussen {euro(GIFT_MIN_CENTS)} en {euro(GIFT_MAX_CENTS)}.
+                {t("giftcards.form.range", { min: euro(GIFT_MIN_CENTS), max: euro(GIFT_MAX_CENTS) })}
               </p>
             </section>
 
             <section className="space-y-3">
-              <Label>Ontwerp</Label>
+              <Label>{t("giftcards.form.design")}</Label>
               <div className="flex flex-wrap gap-2">
                 {GIFT_DESIGNS.map((d) => (
                   <button
@@ -158,7 +159,7 @@ export default function GiftCards() {
 
             <section className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="gift-buyer-email">Jouw e-mail (factuur)</Label>
+                <Label htmlFor="gift-buyer-email">{t("giftcards.form.buyerEmail")}</Label>
                 <Input
                   id="gift-buyer-email"
                   type="email"
@@ -168,7 +169,7 @@ export default function GiftCards() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="gift-buyer-name">Jouw naam</Label>
+                <Label htmlFor="gift-buyer-name">{t("giftcards.form.buyerName")}</Label>
                 <Input
                   id="gift-buyer-name"
                   value={purchaserName}
@@ -176,17 +177,17 @@ export default function GiftCards() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="gift-to-email">E-mail ontvanger</Label>
+                <Label htmlFor="gift-to-email">{t("giftcards.form.recipientEmail")}</Label>
                 <Input
                   id="gift-to-email"
                   type="email"
                   value={recipientEmail}
                   onChange={(e) => setRecipientEmail(e.target.value)}
-                  placeholder="Optioneel — anders krijg jij de bon"
+                  placeholder={t("giftcards.form.recipientEmailPlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="gift-to-name">Naam ontvanger</Label>
+                <Label htmlFor="gift-to-name">{t("giftcards.form.recipientName")}</Label>
                 <Input
                   id="gift-to-name"
                   value={recipientName}
@@ -194,7 +195,7 @@ export default function GiftCards() {
                 />
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="gift-message">Persoonlijke boodschap</Label>
+                <Label htmlFor="gift-message">{t("giftcards.form.message")}</Label>
                 <Textarea
                   id="gift-message"
                   rows={3}
@@ -209,31 +210,31 @@ export default function GiftCards() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="flex items-center gap-2 font-medium">
-                    <Truck className="h-4 w-4" /> Fysieke bon opsturen
+                    <Truck className="h-4 w-4" /> {t("giftcards.form.physical")}
                   </p>
-                  <p className="text-sm text-muted-foreground">Gratis binnen België.</p>
+                  <p className="text-sm text-muted-foreground">{t("giftcards.form.physicalFree")}</p>
                 </div>
                 <Switch checked={physical} onCheckedChange={setPhysical} aria-label="Fysieke levering" />
               </div>
               {physical ? (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <Input
-                    placeholder="Naam op de zending"
+                    placeholder={t("giftcards.form.shipName")}
                     value={ship.name}
                     onChange={(e) => setShip({ ...ship, name: e.target.value })}
                   />
                   <Input
-                    placeholder="Straat en nummer"
+                    placeholder={t("giftcards.form.shipLine1")}
                     value={ship.line1}
                     onChange={(e) => setShip({ ...ship, line1: e.target.value })}
                   />
                   <Input
-                    placeholder="Postcode"
+                    placeholder={t("giftcards.form.shipPostal")}
                     value={ship.postalCode}
                     onChange={(e) => setShip({ ...ship, postalCode: e.target.value })}
                   />
                   <Input
-                    placeholder="Gemeente"
+                    placeholder={t("giftcards.form.shipCity")}
                     value={ship.city}
                     onChange={(e) => setShip({ ...ship, city: e.target.value })}
                   />
@@ -243,7 +244,7 @@ export default function GiftCards() {
 
             <Button onClick={submit} disabled={busy} size="lg">
               {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Bon van {euro(effectiveAmount)} kopen
+              {t("giftcards.form.submit", { amount: euro(effectiveAmount) })}
             </Button>
           </div>
 

@@ -17,6 +17,7 @@ import {
   startDonationCheckout,
 } from "@/lib/donations.functions";
 import type { BadgeNameFormat, BadgeType } from "@/lib/profile-display";
+import { useI18n } from "@/lib/i18n";
 
 type Target = Awaited<ReturnType<typeof getDonationTarget>>;
 
@@ -26,6 +27,7 @@ const euro = (cents: number) =>
 
 /** Publieke donatiepagina van een geverifieerde maker. */
 export default function Donate() {
+  const { t } = useI18n();
   const params = useParams({ strict: false }) as { username?: string };
   const search = useSearch({ strict: false }) as { donation?: string; status?: string };
   const handle = (params.username ?? "").replace(/^@/, "").toLowerCase();
@@ -88,7 +90,7 @@ export default function Donate() {
 
   const submit = async () => {
     if (effectiveCents < 100) {
-      toast.error("Minimum is €1.");
+      toast.error(t("donate.toast.minimum"));
       return;
     }
     setSubmitting(true);
@@ -111,8 +113,8 @@ export default function Donate() {
     }
     toast.error(
       result?.reason === "stripe_not_configured"
-        ? "Betalingen zijn nog niet geconfigureerd."
-        : "Betaling starten lukte niet. Probeer opnieuw.",
+        ? t("donate.toast.notConfigured")
+        : t("donate.toast.startFailed"),
     );
   };
 
@@ -128,9 +130,9 @@ export default function Donate() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#0d0c0b] px-6 text-center">
         <div className="max-w-sm space-y-2">
-          <h1 className="text-lg font-medium text-[#f4efe4]">Geen donatiepagina</h1>
+          <h1 className="text-lg font-medium text-[#f4efe4]">{t("donate.notFound.title")}</h1>
           <p className="text-sm text-[#f4efe4]/60">
-            @{handle} ontvangt (nog) geen steun via ROUT.
+            {t("donate.notFound.body", { handle })}
           </p>
         </div>
       </main>
@@ -165,15 +167,15 @@ export default function Donate() {
         {paid ? (
           <section className="rounded-3xl border border-[#f4efe4]/12 bg-[#161412] p-8 text-center">
             <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-emerald-400" />
-            <h2 className="text-lg font-medium">Bedankt voor je steun</h2>
+            <h2 className="text-lg font-medium">{t("donate.thanks.title")}</h2>
             <p className="mt-1 text-sm text-[#f4efe4]/60">
-              Je bijdrage is onderweg naar {title}.
+              {t("donate.thanks.body", { title })}
             </p>
           </section>
         ) : (
           <section className="space-y-5 rounded-3xl border border-[#f4efe4]/12 bg-[#161412] p-5 sm:p-6">
             <div className="space-y-2">
-              <Label className="text-xs uppercase tracking-wide text-[#f4efe4]/50">Bedrag</Label>
+              <Label className="text-xs uppercase tracking-wide text-[#f4efe4]/50">{t("donate.form.amount")}</Label>
               <div className="grid grid-cols-4 gap-2">
                 {PRESETS.map((cents) => (
                   <button
@@ -196,7 +198,7 @@ export default function Donate() {
               </div>
               <Input
                 inputMode="decimal"
-                placeholder="Ander bedrag (€)"
+                placeholder={t("donate.form.customAmount")}
                 value={custom}
                 onChange={(e) => setCustom(e.target.value)}
                 className="h-11 border-[#f4efe4]/15 bg-transparent text-[#f4efe4] placeholder:text-[#f4efe4]/35"
@@ -205,12 +207,12 @@ export default function Donate() {
 
             <div className="space-y-2">
               <Label className="text-xs uppercase tracking-wide text-[#f4efe4]/50">
-                Bericht (optioneel)
+                {t("donate.form.messageLabel")}
               </Label>
               <Textarea
                 rows={3}
                 maxLength={500}
-                placeholder="Laat een bericht achter…"
+                placeholder={t("donate.form.messagePlaceholder")}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className="resize-none border-[#f4efe4]/15 bg-transparent text-[#f4efe4] placeholder:text-[#f4efe4]/35"
@@ -219,7 +221,7 @@ export default function Donate() {
 
             <div className="grid gap-2 sm:grid-cols-2">
               <Input
-                placeholder="Je naam (optioneel)"
+                placeholder={t("donate.form.namePlaceholder")}
                 maxLength={80}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -227,7 +229,7 @@ export default function Donate() {
               />
               <Input
                 type="email"
-                placeholder="E-mail (voor je bewijs)"
+                placeholder={t("donate.form.emailPlaceholder")}
                 maxLength={200}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -247,14 +249,13 @@ export default function Donate() {
               ) : (
                 <HeartHandshake className="h-4 w-4" />
               )}
-              Steun {euro(effectiveCents)}
+              {t("donate.form.submit", { amount: euro(effectiveCents) })}
             </Button>
             <p className="text-center text-[11px] text-[#f4efe4]/40">
-              Apple&nbsp;Pay · Google&nbsp;Pay · Bancontact · iDEAL · kaart — beveiligd via Stripe.
+              {t("donate.form.paymentMethods")}
             </p>
             <p className="text-center text-[11px] leading-relaxed text-[#f4efe4]/35">
-              ROUT faciliteert de directe verbinding met het betaalaccount van {title}. Eventuele
-              fooien vallen onder de fiscale verantwoordelijkheid van de ontvanger.
+              {t("donate.form.disclaimer", { title })}
             </p>
 
           </section>
