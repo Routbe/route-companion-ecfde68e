@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { getSessionUser } from "@/lib/auth.functions";
 import { completeBunqOAuth } from "@/lib/bunq-oauth.functions";
+import { claimPendingDraft } from "@/lib/start-draft.functions";
 import { resolvePostLoginPath } from "@/lib/post-login";
 import { BrandLoader } from "@/components/BrandLoader";
 import { Button } from "@/components/ui/button";
