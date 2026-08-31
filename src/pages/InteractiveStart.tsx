@@ -181,11 +181,22 @@ export function InteractiveStart() {
     const timer = window.setTimeout(async () => {
       const result = await checkStartAlias({ data: { handle: alias } }).catch(() => null);
       if (ticket !== seq.current) return;
-      if (!result) {
-        setAliasState({ kind: "invalid", message: "We konden de alias niet controleren." });
+      if (!result || result.reason === "error") {
+        setAliasState({
+          kind: "invalid",
+          message: "We konden de alias net niet controleren. Probeer het opnieuw.",
+        });
         return;
       }
-      setAliasState(result.available ? { kind: "free" } : { kind: "taken" });
+      if (result.available) {
+        setAliasState({ kind: "free" });
+        return;
+      }
+      if (result.reason === "reserved") {
+        setAliasState({ kind: "invalid", message: "Deze alias is voorbehouden aan ROUT zelf." });
+        return;
+      }
+      setAliasState({ kind: "taken" });
     }, 350);
     return () => window.clearTimeout(timer);
   }, [alias]);
