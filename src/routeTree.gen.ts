@@ -34,6 +34,7 @@ import { Route as SelfHostingRouteImport } from './routes/self-hosting'
 import { Route as SignatureRouteImport } from './routes/signature'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SovereigntyRouteImport } from './routes/sovereignty'
+import { Route as StartRouteImport } from './routes/start'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -219,6 +220,11 @@ const SignupRoute = SignupRouteImport.update({
 const SovereigntyRoute = SovereigntyRouteImport.update({
   id: '/sovereignty',
   path: '/sovereignty',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StartRoute = StartRouteImport.update({
+  id: '/start',
+  path: '/start',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StatusRoute = StatusRouteImport.update({
@@ -572,6 +578,7 @@ export interface FileRoutesByFullPath {
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
   '/sovereignty': typeof SovereigntyRoute
+  '/start': typeof StartRoute
   '/status': typeof StatusRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -660,6 +667,7 @@ export interface FileRoutesByTo {
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
   '/sovereignty': typeof SovereigntyRoute
+  '/start': typeof StartRoute
   '/status': typeof StatusRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -750,6 +758,7 @@ export interface FileRoutesById {
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
   '/sovereignty': typeof SovereigntyRoute
+  '/start': typeof StartRoute
   '/status': typeof StatusRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -840,6 +849,7 @@ export interface FileRouteTypes {
     | '/signature'
     | '/signup'
     | '/sovereignty'
+    | '/start'
     | '/status'
     | '/studio'
     | '/terms'
@@ -928,6 +938,7 @@ export interface FileRouteTypes {
     | '/signature'
     | '/signup'
     | '/sovereignty'
+    | '/start'
     | '/status'
     | '/studio'
     | '/terms'
@@ -1017,6 +1028,7 @@ export interface FileRouteTypes {
     | '/signature'
     | '/signup'
     | '/sovereignty'
+    | '/start'
     | '/status'
     | '/studio'
     | '/terms'
@@ -1107,6 +1119,7 @@ export interface RootRouteChildren {
   SignatureRoute: typeof SignatureRoute
   SignupRoute: typeof SignupRoute
   SovereigntyRoute: typeof SovereigntyRoute
+  StartRoute: typeof StartRoute
   StatusRoute: typeof StatusRoute
   StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
@@ -1321,6 +1334,13 @@ declare module '@tanstack/react-router' {
       path: '/sovereignty'
       fullPath: '/sovereignty'
       preLoaderRoute: typeof SovereigntyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/start': {
+      id: '/start'
+      path: '/start'
+      fullPath: '/start'
+      preLoaderRoute: typeof StartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/status': {
@@ -1926,6 +1946,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignatureRoute: SignatureRoute,
   SignupRoute: SignupRoute,
   SovereigntyRoute: SovereigntyRoute,
+  StartRoute: StartRoute,
   StatusRoute: StatusRoute,
   StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
