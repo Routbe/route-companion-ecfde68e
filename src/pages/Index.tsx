@@ -374,7 +374,7 @@ const Index = () => {
                 <h2 className="font-display text-[26px] leading-none text-foreground sketch-underline">
                   {t("preview.title")}
                 </h2>
-                <span className="eyebrow">Nº 01</span>
+                <span className="eyebrow">{t("home.index.eyebrowNumber")}</span>
               </div>
               <ErrorBoundary label="QR Generator" inline>
                 <QRPreview
@@ -459,7 +459,7 @@ const Index = () => {
 
             <div className="w-full max-w-md mt-6">
               <div className="flex items-center justify-between mb-3">
-                <span className="eyebrow">Protocol</span>
+                <span className="eyebrow">{t("home.index.protocolLabel")}</span>
                 <div className="flex items-center gap-2">
                   <div className="inline-flex items-center rounded-full border border-border bg-card p-1">
                     {(["static", "dynamic"] as const).map((m) => (
@@ -477,7 +477,7 @@ const Index = () => {
                       </button>
                     ))}
                   </div>
-                  <InfoHint label="About static and dynamic codes">
+                  <InfoHint label={t("home.index.aboutCodesLabel")}>
                     {t("protocol.staticHint")} {t("protocol.dynamicHint")}
                   </InfoHint>
                 </div>
@@ -492,10 +492,10 @@ const Index = () => {
                   className="w-full rounded-2xl border border-dashed border-border bg-card/60 p-4 text-left transition-colors hover:bg-card"
                 >
                   <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <Link2 className="h-4 w-4" /> Maak er een short link van
+                    <Link2 className="h-4 w-4" /> {t("home.index.makeShortLink")}
                   </span>
                   <span className="mt-1 block text-xs text-muted-foreground">
-                    Kies je domein (ROUT of je eigen domein), krijg een korte link en tel elke scan.
+                    {t("home.index.shortLinkHint")}
                   </span>
                 </button>
               </div>
