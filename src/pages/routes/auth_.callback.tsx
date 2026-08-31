@@ -53,6 +53,17 @@ function AuthCallback() {
         setFailed(true);
         return;
       }
+      // Concept uit de `/start`-tour? Dat wordt nu vastgelegd op dit account —
+      // ook wanneer de tour op een ander toestel gestart werd.
+      const claimed = await claimPendingDraft().catch(() => null);
+      if (!active) return;
+      if (claimed?.committed && claimed.handle) {
+        toast.success(
+          `🎉 Gefeliciteerd! Je profiel rout.be/u/${claimed.handle} staat officieel live.`,
+        );
+        nav({ to: "/studio", replace: true } as never);
+        return;
+      }
       const to = await resolvePostLoginPath();
       if (active) nav({ to, replace: true } as never);
     };
