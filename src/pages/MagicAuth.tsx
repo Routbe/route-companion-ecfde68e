@@ -45,7 +45,7 @@ export function MagicAuth({ mode }: { mode: "login" | "register" }) {
           ? "Maak je ROUT-account met één e-mail — geen wachtwoord nodig."
           : "Log in met een magic link in je mailbox — geen wachtwoord nodig."
       }
-      width="narrow"
+      width="default"
     >
       <div className="mx-auto w-full max-w-sm py-10">
         {sent ? (
