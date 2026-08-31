@@ -646,7 +646,7 @@ export default function About() {
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <Link
-              to="/auth"
+              to="/start"
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-background px-6 text-sm font-medium text-foreground transition-opacity hover:opacity-90"
             >
               Maak je profiel
