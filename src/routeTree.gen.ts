@@ -24,14 +24,17 @@ import { Route as GiftRouteImport } from './routes/gift'
 import { Route as GoRouteImport } from './routes/go'
 import { Route as HubRouteImport } from './routes/hub'
 import { Route as IbanQrRouteImport } from './routes/iban-qr'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManifestoRouteImport } from './routes/manifesto'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QrRouteImport } from './routes/qr'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SelfHostingRouteImport } from './routes/self-hosting'
 import { Route as SignatureRouteImport } from './routes/signature'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SovereigntyRouteImport } from './routes/sovereignty'
+import { Route as StartRouteImport } from './routes/start'
 import { Route as StatusRouteImport } from './routes/status'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -169,6 +172,11 @@ const IbanQrRoute = IbanQrRouteImport.update({
   path: '/iban-qr',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ManifestoRoute = ManifestoRouteImport.update({
   id: '/manifesto',
   path: '/manifesto',
@@ -189,6 +197,11 @@ const QrRoute = QrRouteImport.update({
   path: '/qr',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SelfHostingRoute = SelfHostingRouteImport.update({
   id: '/self-hosting',
   path: '/self-hosting',
@@ -207,6 +220,11 @@ const SignupRoute = SignupRouteImport.update({
 const SovereigntyRoute = SovereigntyRouteImport.update({
   id: '/sovereignty',
   path: '/sovereignty',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StartRoute = StartRouteImport.update({
+  id: '/start',
+  path: '/start',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StatusRoute = StatusRouteImport.update({
@@ -550,14 +568,17 @@ export interface FileRoutesByFullPath {
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
+  '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/register': typeof RegisterRoute
   '/self-hosting': typeof SelfHostingRoute
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
   '/sovereignty': typeof SovereigntyRoute
+  '/start': typeof StartRoute
   '/status': typeof StatusRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -636,14 +657,17 @@ export interface FileRoutesByTo {
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
+  '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/register': typeof RegisterRoute
   '/self-hosting': typeof SelfHostingRoute
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
   '/sovereignty': typeof SovereigntyRoute
+  '/start': typeof StartRoute
   '/status': typeof StatusRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -724,14 +748,17 @@ export interface FileRoutesById {
   '/go': typeof GoRoute
   '/hub': typeof HubRoute
   '/iban-qr': typeof IbanQrRoute
+  '/login': typeof LoginRoute
   '/manifesto': typeof ManifestoRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/register': typeof RegisterRoute
   '/self-hosting': typeof SelfHostingRoute
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
   '/sovereignty': typeof SovereigntyRoute
+  '/start': typeof StartRoute
   '/status': typeof StatusRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
@@ -812,14 +839,17 @@ export interface FileRouteTypes {
     | '/go'
     | '/hub'
     | '/iban-qr'
+    | '/login'
     | '/manifesto'
     | '/onboarding'
     | '/privacy'
     | '/qr'
+    | '/register'
     | '/self-hosting'
     | '/signature'
     | '/signup'
     | '/sovereignty'
+    | '/start'
     | '/status'
     | '/studio'
     | '/terms'
@@ -898,14 +928,17 @@ export interface FileRouteTypes {
     | '/go'
     | '/hub'
     | '/iban-qr'
+    | '/login'
     | '/manifesto'
     | '/onboarding'
     | '/privacy'
     | '/qr'
+    | '/register'
     | '/self-hosting'
     | '/signature'
     | '/signup'
     | '/sovereignty'
+    | '/start'
     | '/status'
     | '/studio'
     | '/terms'
@@ -985,14 +1018,17 @@ export interface FileRouteTypes {
     | '/go'
     | '/hub'
     | '/iban-qr'
+    | '/login'
     | '/manifesto'
     | '/onboarding'
     | '/privacy'
     | '/qr'
+    | '/register'
     | '/self-hosting'
     | '/signature'
     | '/signup'
     | '/sovereignty'
+    | '/start'
     | '/status'
     | '/studio'
     | '/terms'
@@ -1073,14 +1109,17 @@ export interface RootRouteChildren {
   GoRoute: typeof GoRoute
   HubRoute: typeof HubRoute
   IbanQrRoute: typeof IbanQrRoute
+  LoginRoute: typeof LoginRoute
   ManifestoRoute: typeof ManifestoRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   QrRoute: typeof QrRoute
+  RegisterRoute: typeof RegisterRoute
   SelfHostingRoute: typeof SelfHostingRoute
   SignatureRoute: typeof SignatureRoute
   SignupRoute: typeof SignupRoute
   SovereigntyRoute: typeof SovereigntyRoute
+  StartRoute: typeof StartRoute
   StatusRoute: typeof StatusRoute
   StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
@@ -1227,6 +1266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IbanQrRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/manifesto': {
       id: '/manifesto'
       path: '/manifesto'
@@ -1255,6 +1301,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QrRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/self-hosting': {
       id: '/self-hosting'
       path: '/self-hosting'
@@ -1281,6 +1334,13 @@ declare module '@tanstack/react-router' {
       path: '/sovereignty'
       fullPath: '/sovereignty'
       preLoaderRoute: typeof SovereigntyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/start': {
+      id: '/start'
+      path: '/start'
+      fullPath: '/start'
+      preLoaderRoute: typeof StartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/status': {
@@ -1876,14 +1936,17 @@ const rootRouteChildren: RootRouteChildren = {
   GoRoute: GoRoute,
   HubRoute: HubRoute,
   IbanQrRoute: IbanQrRoute,
+  LoginRoute: LoginRoute,
   ManifestoRoute: ManifestoRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   QrRoute: QrRoute,
+  RegisterRoute: RegisterRoute,
   SelfHostingRoute: SelfHostingRoute,
   SignatureRoute: SignatureRoute,
   SignupRoute: SignupRoute,
   SovereigntyRoute: SovereigntyRoute,
+  StartRoute: StartRoute,
   StatusRoute: StatusRoute,
   StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,

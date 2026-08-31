@@ -91,14 +91,21 @@ export function ProfileMenu() {
 
   if (!user) {
     // On the auth portal itself the header CTAs are redundant noise.
-    if (pathname.startsWith("/auth") || pathname.startsWith("/login")) return null;
+    if (
+      pathname.startsWith("/auth") ||
+      pathname.startsWith("/login") ||
+      pathname.startsWith("/register")
+    )
+      return null;
+    // Intent-routing: de navbar gaat altijd rechtstreeks naar de snelle
+    // magic-link pagina's; de interactieve tour hangt aan de marketing-CTA's.
     return (
       <div className="flex items-center gap-1.5">
         <Button asChild variant="ghost" size="sm">
-          <Link to="/auth">Sign in</Link>
+          <Link to="/login">Inloggen</Link>
         </Button>
         <Button asChild size="sm" className="hidden sm:inline-flex">
-          <Link to="/auth?mode=signup">Sign up</Link>
+          <Link to="/register">Registreren</Link>
         </Button>
       </div>
     );

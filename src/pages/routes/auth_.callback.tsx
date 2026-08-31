@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { getSessionUser } from "@/lib/auth.functions";
 import { completeBunqOAuth } from "@/lib/bunq-oauth.functions";
+import { claimPendingDraft } from "@/lib/start-draft.functions";
 import { resolvePostLoginPath } from "@/lib/post-login";
 import { BrandLoader } from "@/components/BrandLoader";
 import { Button } from "@/components/ui/button";
@@ -49,6 +51,17 @@ function AuthCallback() {
           return;
         }
         setFailed(true);
+        return;
+      }
+      // Concept uit de `/start`-tour? Dat wordt nu vastgelegd op dit account —
+      // ook wanneer de tour op een ander toestel gestart werd.
+      const claimed = await claimPendingDraft().catch(() => null);
+      if (!active) return;
+      if (claimed?.committed && claimed.handle) {
+        toast.success(
+          `🎉 Gefeliciteerd! Je profiel rout.be/u/${claimed.handle} staat officieel live.`,
+        );
+        nav({ to: "/studio", replace: true } as never);
         return;
       }
       const to = await resolvePostLoginPath();
