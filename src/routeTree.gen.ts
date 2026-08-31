@@ -29,6 +29,7 @@ import { Route as ManifestoRouteImport } from './routes/manifesto'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QrRouteImport } from './routes/qr'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SelfHostingRouteImport } from './routes/self-hosting'
 import { Route as SignatureRouteImport } from './routes/signature'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -193,6 +194,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const QrRoute = QrRouteImport.update({
   id: '/qr',
   path: '/qr',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SelfHostingRoute = SelfHostingRouteImport.update({
@@ -561,6 +567,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/register': typeof RegisterRoute
   '/self-hosting': typeof SelfHostingRoute
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
@@ -648,6 +655,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/register': typeof RegisterRoute
   '/self-hosting': typeof SelfHostingRoute
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
@@ -737,6 +745,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/register': typeof RegisterRoute
   '/self-hosting': typeof SelfHostingRoute
   '/signature': typeof SignatureRoute
   '/signup': typeof SignupRoute
@@ -826,6 +835,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/qr'
+    | '/register'
     | '/self-hosting'
     | '/signature'
     | '/signup'
@@ -913,6 +923,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/qr'
+    | '/register'
     | '/self-hosting'
     | '/signature'
     | '/signup'
@@ -1001,6 +1012,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/qr'
+    | '/register'
     | '/self-hosting'
     | '/signature'
     | '/signup'
@@ -1090,6 +1102,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   QrRoute: typeof QrRoute
+  RegisterRoute: typeof RegisterRoute
   SelfHostingRoute: typeof SelfHostingRoute
   SignatureRoute: typeof SignatureRoute
   SignupRoute: typeof SignupRoute
@@ -1273,6 +1286,13 @@ declare module '@tanstack/react-router' {
       path: '/qr'
       fullPath: '/qr'
       preLoaderRoute: typeof QrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/self-hosting': {
@@ -1901,6 +1921,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   QrRoute: QrRoute,
+  RegisterRoute: RegisterRoute,
   SelfHostingRoute: SelfHostingRoute,
   SignatureRoute: SignatureRoute,
   SignupRoute: SignupRoute,
