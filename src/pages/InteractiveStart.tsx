@@ -472,7 +472,7 @@ export function InteractiveStart() {
                     <div className="flex items-center gap-2 overflow-hidden rounded-2xl border border-border bg-background px-3 focus-within:ring-2 focus-within:ring-ring">
                       <span
                         className="flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground"
-                        style={brand ? { color: `#${brand.hex}` } : undefined}
+                        style={brand ? { color: brand.color } : undefined}
                       >
                         {brand ? (
                           <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
