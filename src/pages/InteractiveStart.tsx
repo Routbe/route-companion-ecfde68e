@@ -21,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { checkStartAlias, submitStartDraft } from "@/lib/start-draft.functions";
 import { lookupBrandIcon } from "@/utils/brandIcons";
 import { gradientCss } from "@/lib/profile-design";
+import { useI18n } from "@/lib/i18n";
 
 /**
  * Interactieve builder-tour op `/start`.
@@ -135,6 +136,7 @@ function normalizeAlias(raw: string): string {
 }
 
 export function InteractiveStart() {
+  const { t } = useI18n();
   const [step, setStep] = useState(1);
   const [alias, setAlias] = useState("");
   const [aliasState, setAliasState] = useState<AliasState>({ kind: "empty" });
@@ -164,12 +166,12 @@ export function InteractiveStart() {
     if (!ALIAS_RE.test(alias)) {
       setAliasState({
         kind: "invalid",
-        message: "Gebruik enkel kleine letters, cijfers, punt, streepje of underscore.",
+        message: t("start.alias.invalidChars"),
       });
       return;
     }
     if (alias.length < 3) {
-      setAliasState({ kind: "invalid", message: "Je alias moet minstens 3 tekens lang zijn." });
+      setAliasState({ kind: "invalid", message: t("start.alias.tooShort") });
       return;
     }
     if (digitCount(alias) < 2) {
@@ -184,7 +186,7 @@ export function InteractiveStart() {
       if (!result || result.reason === "error") {
         setAliasState({
           kind: "invalid",
-          message: "We konden de alias net niet controleren. Probeer het opnieuw.",
+          message: t("start.alias.checkFailed"),
         });
         return;
       }
@@ -193,7 +195,7 @@ export function InteractiveStart() {
         return;
       }
       if (result.reason === "reserved") {
-        setAliasState({ kind: "invalid", message: "Deze alias is voorbehouden aan ROUT zelf." });
+        setAliasState({ kind: "invalid", message: t("start.alias.reserved") });
         return;
       }
       setAliasState({ kind: "taken" });
@@ -202,7 +204,7 @@ export function InteractiveStart() {
   }, [alias]);
 
   const aliasOk = aliasState.kind === "free";
-  const previewName = displayName.trim() || (alias ? `u/${alias}` : "Jouw naam");
+  const previewName = displayName.trim() || (alias ? `u/${alias}` : t("start.preview.defaultName"));
   const activeLinks = links.map((url) => url.trim()).filter((url) => url.length > 0);
 
   const submit = async () => {
@@ -218,18 +220,18 @@ export function InteractiveStart() {
         avatarUrl: avatarUrl.trim() || null,
         links: activeLinks.map((url, index) => ({
           url: /^https?:\/\//i.test(url) ? url : `https://${url}`,
-          label: lookupBrandIcon(url)?.title || `Link ${index + 1}`,
+          label: lookupBrandIcon(url)?.title || t("start.link.fallbackLabel", { index: index + 1 }),
         })),
         wantVcard,
       },
     }).catch(() => null);
     setBusy(false);
     if (!result?.ok) {
-      toast.error("We konden je profiel niet bewaren. Controleer je e-mailadres en probeer opnieuw.");
+      toast.error(t("start.submit.error"));
       return;
     }
     setSent(true);
-    toast.success("Inloglink verstuurd — check je mailbox om je profiel live te zetten.");
+    toast.success(t("start.submit.success"));
   };
 
   /* --------------------------------------------------------- live preview */
@@ -289,7 +291,7 @@ export function InteractiveStart() {
               }}
             >
               <Contact className="h-3.5 w-3.5" aria-hidden />
-              Bewaar contact
+              {t("start.preview.saveContact")}
             </div>
           ) : null}
         </div>
@@ -303,11 +305,9 @@ export function InteractiveStart() {
       return (
         <div className="rounded-3xl border border-border bg-card p-8 text-center">
           <Sparkles className="mx-auto h-8 w-8" aria-hidden />
-          <h2 className="mt-4 text-lg font-semibold text-foreground">Check je mailbox</h2>
+          <h2 className="mt-4 text-lg font-semibold text-foreground">{t("start.sent.title")}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            We stuurden een inloglink naar <span className="font-medium">{email.trim()}</span>. Zodra
-            je die opent staat <span className="font-medium">rout.be/u/{alias}</span> live — ook als
-            je op een ander toestel inlogt.
+{t("start.sent.body1")} <span className="font-medium">{email.trim()}</span>. {t("start.sent.body2")} <span className="font-medium">rout.be/u/{alias}</span> {t("start.sent.body3")}
           </p>
         </div>
       );
@@ -317,20 +317,19 @@ export function InteractiveStart() {
       return (
         <div className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-xl font-semibold text-foreground">
-            🎉 Je profiel rout.be/u/{alias} is klaar!
+🎉 {t("start.done.title", { alias })}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Vul je e-mailadres in. We sturen een inloglink om je gemaakte profiel direct te claimen
-            en live te zetten.
+{t("start.done.body")}
           </p>
           <div className="mt-6 space-y-2">
-            <Label htmlFor="start-email">E-mailadres</Label>
+            <Label htmlFor="start-email">{t("start.email.label")}</Label>
             <Input
               id="start-email"
               type="email"
               inputMode="email"
               autoComplete="email"
-              placeholder="jij@voorbeeld.be"
+              placeholder={t("start.email.placeholder")}
               value={email}
               maxLength={320}
               onChange={(event) => setEmail(event.target.value)}
@@ -347,14 +346,14 @@ export function InteractiveStart() {
             ) : (
               <Zap className="h-4 w-4" aria-hidden />
             )}
-            Claim &amp; Zet Profiel Live
+{t("start.done.cta")}
           </Button>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
             <Button variant="ghost" onClick={() => setStep(4)} className="rounded-2xl px-2">
-              <ArrowLeft className="h-4 w-4" aria-hidden /> Terug
+              <ArrowLeft className="h-4 w-4" aria-hidden /> {t("start.common.back")}
             </Button>
             <Link to="/login" className="font-medium text-foreground underline">
-              Heb je al een ROUT-account? Log hier in om dit ontwerp toe te voegen ➔
+              {t("start.done.loginLink")}
             </Link>
           </div>
         </div>
@@ -366,14 +365,13 @@ export function InteractiveStart() {
         {step === 1 ? (
           <>
             <h2 className="text-xl font-semibold text-foreground">
-              1. Kies je gratis Privacy-Alias
+              {t("start.step1.title")}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Jouw unieke adres op het internet. Je kan later altijd nog een geverifieerd profiel
-              koppelen.
+              {t("start.step1.body")}
             </p>
             <div className="mt-6 space-y-2">
-              <Label htmlFor="start-alias">Alias</Label>
+              <Label htmlFor="start-alias">{t("start.step1.aliasLabel")}</Label>
               <div className="flex items-center gap-0 overflow-hidden rounded-2xl border border-border bg-background focus-within:ring-2 focus-within:ring-ring">
                 <span className="shrink-0 border-r border-border px-3 py-2.5 text-sm text-muted-foreground">
                   rout.be/u/
@@ -382,26 +380,25 @@ export function InteractiveStart() {
                   id="start-alias"
                   value={alias}
                   autoFocus
-                  placeholder="studiomix99"
+                  placeholder={t("start.step1.aliasPlaceholder")}
                   onChange={(event) => setAlias(normalizeAlias(event.target.value))}
                   className="w-full bg-transparent px-3 py-2.5 text-sm outline-none"
                 />
               </div>
               <p className="min-h-5 text-xs" aria-live="polite">
                 {aliasState.kind === "checking" ? (
-                  <span className="text-muted-foreground">Beschikbaarheid controleren…</span>
+                  <span className="text-muted-foreground">{t("start.alias.checking")}</span>
                 ) : aliasState.kind === "free" ? (
                   <span className="text-emerald-600 dark:text-emerald-400">
-                    🟢 u/{alias} is gereserveerd voor jou!
+                    🟢 {t("start.alias.free", { alias })}
                   </span>
                 ) : aliasState.kind === "digits" ? (
                   <span className="text-amber-600 dark:text-amber-400">
-                    ❗ Je alias moet minstens 2 cijfers bevatten (bijv. studiomix99) om je privacy te
-                    beschermen.
+                    ❗ {t("start.alias.digits")}
                   </span>
                 ) : aliasState.kind === "taken" ? (
                   <span className="text-destructive">
-                    🔴 Deze alias is al geclaimd. Probeer {alias}0.
+                    🔴 {t("start.alias.taken", { alias })}
                   </span>
                 ) : aliasState.kind === "invalid" ? (
                   <span className="text-destructive">❗ {aliasState.message}</span>
@@ -413,17 +410,16 @@ export function InteractiveStart() {
               disabled={!aliasOk}
               className="mt-6 w-full rounded-2xl sm:w-auto"
             >
-              Volgende: Kies je Stijl <ArrowRight className="h-4 w-4" aria-hidden />
+{t("start.step1.next")} <ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           </>
         ) : null}
 
         {step === 2 ? (
           <>
-            <h2 className="text-xl font-semibold text-foreground">2. Kies je visuele identiteit</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("start.step2.title")}</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Selecteer een thema dat bij je past. Je kan later alle kleuren en lettertypes nog
-              aanpassen.
+              {t("start.step2.body")}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {THEMES.map((item) => {
@@ -444,7 +440,7 @@ export function InteractiveStart() {
                       className="flex h-14 items-center justify-center rounded-xl text-[10px] font-medium"
                       style={{ background: item.bg, color: item.fg, fontFamily: item.font }}
                     >
-                      Aa
+                      {t("start.step2.aaSample")}
                     </span>
                     <span className="mt-2 flex items-center gap-1 text-sm font-medium text-foreground">
                       {item.label}
@@ -457,10 +453,10 @@ export function InteractiveStart() {
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button variant="outline" onClick={() => setStep(1)} className="rounded-2xl">
-                <ArrowLeft className="h-4 w-4" aria-hidden /> Terug
+                <ArrowLeft className="h-4 w-4" aria-hidden /> {t("start.common.back")}
               </Button>
               <Button onClick={() => setStep(3)} className="rounded-2xl">
-                Volgende: Links Toevoegen <ArrowRight className="h-4 w-4" aria-hidden />
+                {t("start.step2.next")} <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
             </div>
           </>
@@ -469,17 +465,17 @@ export function InteractiveStart() {
         {step === 3 ? (
           <>
             <h2 className="text-xl font-semibold text-foreground">
-              3. Voeg je belangrijkste links toe
+              {t("start.step3.title")}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Waar wil je dat bezoekers als eerste naartoe gaan?
+              {t("start.step3.body")}
             </p>
             <div className="mt-6 space-y-4">
               {links.map((value, index) => {
                 const brand = lookupBrandIcon(value);
                 return (
                   <div key={index} className="space-y-2">
-                    <Label htmlFor={`start-link-${index}`}>Link {index + 1}</Label>
+                    <Label htmlFor={`start-link-${index}`}>{t("start.step3.linkLabel", { index: index + 1 })}</Label>
                     <div className="flex items-center gap-2 overflow-hidden rounded-2xl border border-border bg-background px-3 focus-within:ring-2 focus-within:ring-ring">
                       <span
                         className="flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground"
@@ -496,7 +492,7 @@ export function InteractiveStart() {
                       <input
                         id={`start-link-${index}`}
                         value={value}
-                        placeholder={index === 0 ? "instagram.com/jouwnaam" : "jouwsite.be"}
+                        placeholder={index === 0 ? t("start.step3.placeholder1") : t("start.step3.placeholder2")}
                         onChange={(event) =>
                           setLinks((prev) =>
                             prev.map((item, i) => (i === index ? event.target.value : item)),
@@ -513,15 +509,15 @@ export function InteractiveStart() {
                   checked={wantVcard}
                   onCheckedChange={(value) => setWantVcard(value === true)}
                 />
-                Voeg direct een vCard contactknop toe
+{t("start.step3.vcard")}
               </label>
             </div>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Button variant="outline" onClick={() => setStep(2)} className="rounded-2xl">
-                <ArrowLeft className="h-4 w-4" aria-hidden /> Terug
+                <ArrowLeft className="h-4 w-4" aria-hidden /> {t("start.common.back")}
               </Button>
               <Button onClick={() => setStep(4)} className="rounded-2xl">
-                Volgende: Laatste details <ArrowRight className="h-4 w-4" aria-hidden />
+                {t("start.step3.next")} <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
               <Button
                 variant="ghost"
@@ -531,7 +527,7 @@ export function InteractiveStart() {
                 }}
                 className="rounded-2xl text-muted-foreground"
               >
-                Stap overslaan
+{t("start.step3.skip")}
               </Button>
             </div>
           </>
@@ -539,56 +535,56 @@ export function InteractiveStart() {
 
         {step === 4 ? (
           <>
-            <h2 className="text-xl font-semibold text-foreground">4. Hoe mogen we je noemen?</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("start.step4.title")}</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Vul je weergavenaam en korte introductie in.
+              {t("start.step4.body")}
             </p>
             <div className="mt-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="start-name">Weergavenaam</Label>
+                <Label htmlFor="start-name">{t("start.step4.nameLabel")}</Label>
                 <Input
                   id="start-name"
                   value={displayName}
                   maxLength={80}
-                  placeholder="Studio Mix"
+                  placeholder={t("start.step4.namePlaceholder")}
                   onChange={(event) => setDisplayName(event.target.value)}
                   className="rounded-2xl"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="start-bio">Korte introductie</Label>
+                <Label htmlFor="start-bio">{t("start.step4.bioLabel")}</Label>
                 <Textarea
                   id="start-bio"
                   value={bio}
                   maxLength={160}
                   rows={3}
-                  placeholder="Producer uit Gent. Boekingen via de link hieronder."
+                  placeholder={t("start.step4.bioPlaceholder")}
                   onChange={(event) => setBio(event.target.value.slice(0, 160))}
                   className="rounded-2xl"
                 />
                 <p className="text-right text-xs text-muted-foreground">{bio.length}/160</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="start-avatar">Avatar (URL)</Label>
+                <Label htmlFor="start-avatar">{t("start.step4.avatarLabel")}</Label>
                 <Input
                   id="start-avatar"
                   value={avatarUrl}
                   maxLength={400}
-                  placeholder="https://…/foto.jpg"
+                  placeholder={t("start.step4.avatarPlaceholder")}
                   onChange={(event) => setAvatarUrl(event.target.value)}
                   className="rounded-2xl"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Liever later uploaden? Dat kan in de Studio na je login.
+                  {t("start.step4.avatarHint")}
                 </p>
               </div>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button variant="outline" onClick={() => setStep(3)} className="rounded-2xl">
-                <ArrowLeft className="h-4 w-4" aria-hidden /> Terug
+                <ArrowLeft className="h-4 w-4" aria-hidden /> {t("start.common.back")}
               </Button>
               <Button onClick={() => setStep(5)} className="rounded-2xl">
-                <Rocket className="h-4 w-4" aria-hidden /> Bekijk &amp; Zet Live
+                <Rocket className="h-4 w-4" aria-hidden /> {t("start.step4.finalCta")}
               </Button>
             </div>
           </>
@@ -599,13 +595,13 @@ export function InteractiveStart() {
 
   return (
     <AppLayout
-      title="Bouw je ROUT-profiel"
-      description="Een korte interactieve tour: kies je privacy-alias, je stijl en je links — je account maak je pas op het einde."
+      title={t("start.page.title")}
+      description={t("start.page.description")}
       width="wide"
     >
       <div className="py-8">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {sent ? "Klaar" : `Stap ${Math.min(step, 4)} van 4`}
+          {sent ? t("start.progress.done") : t("start.progress.step", { step: Math.min(step, 4) })}
         </p>
         <div className="mt-3 flex gap-1.5" aria-hidden>
           {[1, 2, 3, 4].map((index) => (
@@ -625,7 +621,7 @@ export function InteractiveStart() {
           <aside className="hidden lg:block">
             <div className="sticky top-24">
               <p className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                <Eye className="h-3.5 w-3.5" aria-hidden /> Live preview
+                <Eye className="h-3.5 w-3.5" aria-hidden /> {t("start.preview.liveLabel")}
               </p>
               {preview}
             </div>
@@ -647,7 +643,7 @@ export function InteractiveStart() {
             className="w-full rounded-2xl"
           >
             <Eye className="h-4 w-4" aria-hidden />
-            {showPreview ? "Verberg live preview" : "Bekijk live preview"}
+            {showPreview ? t("start.preview.hide") : t("start.preview.show")}
           </Button>
         </div>
       </div>
